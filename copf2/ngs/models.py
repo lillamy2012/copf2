@@ -33,10 +33,10 @@ class Flowlane(models.Model):
     barcode = models.CharField(max_length=1000,null=True)
     mdsum = models.CharField(max_length=200,null=True)
     #multi_id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=200,null=True)
-    read_length = models.IntegerField(null=True)
-    read_type = models.CharField(max_length=2,choices=READ_TYPE_CHOICES,null=True)
-    results = models.CharField(max_length=20,null=True)
+    name = models.CharField(max_length=200,primary_key=True)
+    read_length = models.IntegerField()
+    read_type = models.CharField(max_length=2,choices=READ_TYPE_CHOICES)
+    results = models.CharField(max_length=20)
     storage = models.CharField(max_length=200,null=True)
 
 

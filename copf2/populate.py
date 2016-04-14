@@ -47,15 +47,34 @@ def link_sample_flowlane(sample,flowlane):
     sample.flowlane.add(flowlane)
     return(sample)
 
+### function to updata flowlane with the barcodestring needed for demultiplexing (only group samples included)
+
+def update_flowlane_barcodes(flowlane,barcodestring):
+    obj = Flowlane.objects.filter(name=flowlane.name)  # this is a query set which seems to be needed for the update step
+    obj.update(barcode=barcodestring)
+    return(obj)
+
+
+
 #####################################################
 ### main functions
 #####################################################
 
+#### function to create barcodestring per flowlane and updating the flowlane with this info
+
+def getBarcodeStrings(flowlane):
+    samples = flowlane.sample_set.all()
+    b=list()
+    for i in samples:
+        b.append(str(i.sample_id)+":"+Sample.objects.get(sample_id=i.sample_id).barcode)
+    bas=",".join(b)
+    up = update_flowlane_barcodes(flowlane,bas)
+    return(up)
+
+
 ### function that creates flowlane per sample, using forskalle
 
 def extractAndAdd_flowlane(sample):
-    if len(sample.flowlane.all())>0: ## sample has already been checked
-        return None
     if not sample.status=="Ready": ## sample results not finished
         return None
     print "query forskalle " + str(sample.sample_id)
@@ -64,21 +83,22 @@ def extractAndAdd_flowlane(sample):
     nr = len(data) ## number of flowcell+lane the sample is on
     for i in range(0,nr): ## process each flowcell+lane at the time
         myd = data[i]
-        name = myd['flowcell_id']+"_"+str(myd['num'])
-        readlen = myd['flowcell']['readlen']
-        if myd['flowcell']['paired']==1:
-            readtype="PR"
-        else:
-            readtype="SR"
-        cc = myd['unsplit_checks'] # md5 sum for multiplexed bam file
-        if not len(cc)==1:
-            raise Exception("wrong number of raw checks")
-        for i in cc:
-            md5 = cc[i]['md5']
-            results = cc[i]['result']
-        flow=add_flowlane(md5,name,readlen,readtype,results)
-        link_sample_flowlane(sample,flow)
-os.remove('temp.json') # remove temp file to avoid getting samples mixed up
+        if myd['is_ok']==1:
+            name = myd['flowcell_id']+"_"+str(myd['num'])
+            readlen = myd['flowcell']['readlen']
+            if myd['flowcell']['paired']==1:
+                readtype="PR"
+            else:
+                readtype="SR"
+            cc = myd['unsplit_checks'] # md5 sum for multiplexed bam file
+            if not len(cc)==1:
+                raise Exception("wrong number of raw checks "+str(sample.sample_id)+" "+str(len(cc)))
+            for i in cc:
+                md5 = cc[i]['md5']
+                results = cc[i]['result']
+                flow=add_flowlane(md5,name,readlen,readtype,results)
+                link_sample_flowlane(sample,flow)
+    os.remove('temp.json') # remove temp file to avoid getting samples mixed up
 
 
 
@@ -91,10 +111,21 @@ def createEntries(json):
         ns=add_sample(antibody=d['antibody'],barcode=d['tag'],celltype=d['celltype'],comments=d['comments'],descr=d['descr'],exptype=d['exptype'],genotype=d['genotype'].rstrip(),organism=d['organism'],preparation_type=d['preparation_type'],sample_id=d['id'],scientist=sc,status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
         mu=extractAndAdd_flowlane(ns)
 
+### wrapper to update barstring for all flowlanes in db
+
+def update_all_flowlanes():
+    for i in Flowlane.objects.all():
+        getBarcodeStrings(i)
 
 #############################################################
 ### running the program
 #############################################################
+
+time='99+years'
+
+gjson="group_"+time.replace('+','_')+".json"
+
+print gjson
 
 if __name__ == '__main__':
     print "Starting second generation population script..."
@@ -105,6 +136,20 @@ if __name__ == '__main__':
     
     ## start
     print "samples from forskalle"
-    forkalleapi('samples?group=Berger&since=3+months','group3months.json')
+    #forkalleapi('samples?group=Berger&since='+time,gjson)
     print "creating sample from json"
-    createSamples('group3months.json')
+    #createEntries(gjson)
+    print "generating barcode strings"
+    #update_all_flowlanes()
+    fl = Flowlane.objects.all()
+    sa = Sample.objects.all()
+    print "number of flowlanes: " + str(len(fl))
+    for i in fl:
+        print i.name, i.barcode
+    print "number of samples: " + str(len(sa))
+
+## okat 15352
+##16844
+## check problematic sample
+sa =Sample.objects.get(pk=32315)
+print sa.flowlane.all()
