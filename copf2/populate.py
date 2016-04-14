@@ -83,21 +83,23 @@ def extractAndAdd_flowlane(sample):
     nr = len(data) ## number of flowcell+lane the sample is on
     for i in range(0,nr): ## process each flowcell+lane at the time
         myd = data[i]
-        if myd['is_ok']==1:
-            name = myd['flowcell_id']+"_"+str(myd['num'])
-            readlen = myd['flowcell']['readlen']
-            if myd['flowcell']['paired']==1:
-                readtype="PR"
-            else:
-                readtype="SR"
+        name = myd['flowcell_id']+"_"+str(myd['num'])
+        readlen = myd['flowcell']['readlen']
+        if myd['flowcell']['paired']==1:
+            readtype="PR"
+        else:
+            readtype="SR"
+        results = myd['is_ok']
+        if results==1:
             cc = myd['unsplit_checks'] # md5 sum for multiplexed bam file
             if not len(cc)==1:
                 raise Exception("wrong number of raw checks "+str(sample.sample_id)+" "+str(len(cc)))
             for i in cc:
                 md5 = cc[i]['md5']
-                results = cc[i]['result']
-                flow=add_flowlane(md5,name,readlen,readtype,results)
-                link_sample_flowlane(sample,flow)
+        else:
+            md5 = None
+        flow=add_flowlane(md5,name,readlen,readtype,results)
+        link_sample_flowlane(sample,flow)
     os.remove('temp.json') # remove temp file to avoid getting samples mixed up
 
 
@@ -136,11 +138,11 @@ if __name__ == '__main__':
     
     ## start
     print "samples from forskalle"
-    #forkalleapi('samples?group=Berger&since='+time,gjson)
+    forkalleapi('samples?group=Berger&since='+time,gjson)
     print "creating sample from json"
-    #createEntries(gjson)
+    createEntries(gjson)
     print "generating barcode strings"
-    #update_all_flowlanes()
+    update_all_flowlanes()
     fl = Flowlane.objects.all()
     sa = Sample.objects.all()
     print "number of flowlanes: " + str(len(fl))
@@ -149,7 +151,7 @@ if __name__ == '__main__':
     print "number of samples: " + str(len(sa))
 
 ## okat 15352
-##16844
+##16844, 32315
 ## check problematic sample
-sa =Sample.objects.get(pk=32315)
-print sa.flowlane.all()
+#sa =Sample.objects.get(pk=16844)
+#print sa.flowlane.all()
