@@ -1,0 +1,80 @@
+{% extends 'ngs/base.html' %}
+{% block body_block %}
+
+
+<div class="container">     
+ 
+  <h1>Overview</h1>
+  
+  <table class="table table-striped">
+
+    <thead>
+        <tr>
+          <th class="col-sm-8">Category</th>
+          <th class="col-sm-2">Number</th>
+        </tr>
+    </thead>
+    <tbody>
+      <tr>
+	<td> <a href="scientists">Scientists</a> </td>
+	<td> {{ scientist }} </td>
+      </tr>
+      <tr>
+	<td> <a href="samples">Samples</a> </td>
+	<td> {{ samples }} </td>
+	
+      </tr>
+       <tr>
+	<td> <a href="flowlanes">Flowlanes </a>(FlowcellID+lane number) </td>
+	<td> {{ flowlanes }} </td>
+	
+      </tr>
+
+    </tbody>
+  </table>
+  
+  
+ 
+  
+</div>
+
+
+
+
+<div class="container">     
+  <h2>Messages</h2>
+  Copf2 is under construction!
+ 
+</div>
+
+<div class="container">     
+  <h3>Berger Group links</h3>
+  <ul class="div">
+    <li><a href="http://sequencing-gmi-01:3838/">Shiny Apps</a>: 
+      <ul>
+	<li> <a href="http://sequencing-gmi-01:3838/PaApp/">PaApp</a> for analysis of proteomics data
+	<li> <a href="http://sequencing-gmi-01:3838/Mp_BLAST/"> Mp_BLAST</a> Blast against the berger group's Marchantia transcriptome
+      </ul>
+    <li><a href="">Lab database</a>: Database with antibodies, kits, etc. </li>
+    
+    
+  </ul>
+  
+</div>
+
+<div class="container">     
+  <h3>Useful <a href="http://www.vbcf.ac.at/facilities/ngs/about-ngs/">VBCF-NGS</a> links </h3>
+  <ul class="div">
+    <li><a href="http://ngs.csf.ac.at/forskalle">Forskalle</a>: For submission and
+    administration of your sequencing requests to the CSF-NGS </li>
+    <li><a href="http://ngs.vbcf.ac.at">Queue</a>: For checking the progress of your CSF-NGS requests and securely download finished sequencing data</li>
+    <li><a href="http://sequencing.vbcf.viennabiocenter.org/galaxy">Galaxy</a>: Providing a userfriendly interface for
+    making your own analyses</li>
+    
+  </ul>
+  
+</div>
+{% endblock %}
+
+
+
