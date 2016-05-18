@@ -1,3 +1,4 @@
+import sys, getopt
 import os
 import requests
 import json
@@ -119,17 +120,38 @@ def update_all_flowlanes():
     for i in Flowlane.objects.all():
         getBarcodeStrings(i)
 
+### read in arguments (time to check)
+
+def inarg(argv):
+    try:
+        opts, args = getopt.getopt(argv,"hd:",["date="])
+    except getopt.GetoptError:
+        print 'populate.py -d <date>'
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print 'populate.py -d <date>'
+            sys.exit()
+        elif opt in ("-d", "--date"):
+            time = arg
+    if not 'time' in locals():
+        print 'populate.py -d <date>'
+        sys.exit(2)
+    print 'date is',time
+    return(time)
+
 #############################################################
 ### running the program
 #############################################################
 
-time='99+years'
+#time='99+years'
 
-gjson="group_"+time.replace('+','_')+".json"
 
-print gjson
 
 if __name__ == '__main__':
+    time = inarg(sys.argv[1:])
+    gjson="group_"+time.replace('+','_')+".json"
+    print gjson
     print "Starting second generation population script..."
     from django.core.wsgi import get_wsgi_application
     os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
@@ -148,7 +170,7 @@ if __name__ == '__main__':
     print "number of flowlanes: " + str(len(fl))
     for i in fl:
         print i.name, i.barcode
-    print "number of samples: " + str(len(sa))
+        print "number of samples: " + str(len(sa))
 
 ## okat 15352
 ##16844, 32315

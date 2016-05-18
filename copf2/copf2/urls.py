@@ -8,6 +8,8 @@ urlpatterns = patterns('',
     # url(r'^$', 'copf2.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
     url(r'^$', include('ngs.urls')),
-    url(r'^ngs/', include('ngs.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^', include('ngs.urls')),
+                       #url(r'^ngs/', include('ngs.urls')),
+                       #url(r'^admin/', include(admin.site.urls)),
+                       
 )
