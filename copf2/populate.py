@@ -111,7 +111,12 @@ def createEntries(json):
     data=read_json(json)
     for d in data:
         sc=add_scientist(name=d['scientist'])
-        ns=add_sample(antibody=d['antibody'],barcode=d['tag'],celltype=d['celltype'],comments=d['comments'],descr=d['descr'],exptype=d['exptype'],genotype=d['genotype'].rstrip(),organism=d['organism'],preparation_type=d['preparation_type'],sample_id=d['id'],scientist=sc,status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
+        if d['secondary_tag'] is not None:
+            mbc=d['tag']+d['secondary_tag']
+        #mbc=d['secondary_tag']
+        else:
+            mbc=d['tag']
+        ns=add_sample(antibody=d['antibody'],barcode=mbc,celltype=d['celltype'],comments=d['comments'],descr=d['descr'],exptype=d['exptype'],genotype=d['genotype'].rstrip(),organism=d['organism'],preparation_type=d['preparation_type'],sample_id=d['id'],scientist=sc,status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
         mu=extractAndAdd_flowlane(ns)
 
 ### wrapper to update barstring for all flowlanes in db
