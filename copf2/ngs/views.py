@@ -21,7 +21,12 @@ def scientists(request):
     return render(request, 'scientists.html', {'table': table})
 
 def samples(request):
-    table = SampleTable(Sample.objects.all())
+    #flowlane = request.GET.get('flowlane')
+    scientist = request.GET.get('scientist')
+    if scientist == None:
+        table = SampleTable(Sample.objects.all())
+    else:
+        table = SampleTable(Sample.objects.filter(scientist=scientist))
     RequestConfig(request).configure(table)
     return render(request, 'scientists.html', {'table': table})
 
