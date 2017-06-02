@@ -10,8 +10,14 @@ class SampleTable(tables.Table):
     class Meta:
         model = Sample
         attrs = {"class": "paleblue"}
-        sequence = ('sample_id','barcode',)
+        sequence = ('sample_id','barcode','flow_name')
 
+    flow_name = tables.Column(accessor="flowlane", verbose_name="Flowlane")
+
+    def render_flow_name(self, value):
+        if value is not None:
+            return ', '.join([flowlane.name for flowlane in value.all()])
+        return '-'
 
 class FlowlaneTable(tables.Table):
     class Meta:
