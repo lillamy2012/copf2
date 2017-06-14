@@ -4,36 +4,38 @@ import glob
 import ntpath
 
 
-def getBamFiles(path):
+def getBamFiles(path): # get all bam files in folder
     bamFiles=glob.glob(path+'/*.bam')
-    #bamList=list()
-    #for i in bamFiles:
-    #   bamList.append(ntpath.basename(i)[0:11])
     return(bamFiles)
 
-def checkIfThere(path,sampleL):
-    files=getBamFiles(path)
-    FL=getDBList(sampleL)
-    for f in FL:
-        print f
-        print "***"
-        print [s for s in files if f in s]
+#def checkIfThere(path,sampleL):
+#   files=getBamFiles(path)
+#   FL=getDBList(sampleL)
+#   for f in FL:
+#       hit=0
+#       for s in files:
+#           if f in s:
+#               hit=hit+1
+
+def checkIfThere(files,sample): # given a sample and a list of files check if file for sample exist
+    hit=0
+    f_list=list()
+    for f in files:
+        if sample in f:
+            hit=hit+1
+            f_list.append(f)
+    if hit > 0:
+        return(f_list)
 
 
 def getDBList(FL):
     dbList=list()
     for i in FL:
-        dbList.append(str(i.pk))
+        if len(i.flowlane.all()) > 0:
+            dbList.append(str(i.pk))
     return(dbList)
 
-def compare(FL,path):
-    bamList=getBamFiles(path)
-    dbList=getDBList(FL)
-    db_uniq=list(set(dbList) - set(bamList))
-    bam_uniq=list(set(bamList) - set(dbList))
-    common = list(set(bamList).intersection(dbList))
-    res= {'db_unique':db_uniq, 'bam_unique':bam_uniq, 'common':common}
-    return(res)
+
 
 bampath="/Users/elin.axelsson/berger_group/lab/Raw/demultiplexed/"
 
@@ -43,8 +45,13 @@ if __name__ == '__main__':
     application = get_wsgi_application()
     from ngs.models import Sample, Scientist, Flowlane
 
-    all=Sample.objects.all()
-    checkIfThere(bampath,all)
+    all_samples=getDBList(Sample.objects.all())
+    all_files = getBamFiles(bampath)
+    for i in all_samples:
+        res=checkIfThere(all_files,i)
+        print(res)
+
+#checkIfThere(bampath,all)
     #okay=Flowlane.objects.filter(results=1)
     #not_okay=Flowlane.objects.filter(results=0)
     #compALL = compare(all,bampath)

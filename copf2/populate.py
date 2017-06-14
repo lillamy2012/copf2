@@ -30,7 +30,25 @@ def forkalleapi(what,where): ### taken from forskalle api documentation page
 
 ### functions for adding entries to db (sample, scientist and flowlane (flowcell+lane)
 
+def check_if_identical(mdsum,name,read_length,read_type,results):
+    ex=Flowlane.objects.get(pk=name)
+    #print mdsum
+    #print ex.mdsum
+    if ex.mdsum != mdsum:
+        print "wrong mdsum"
+        print ex.mdsum
+        print mdsum
+    if ex.read_length != read_length:
+        print "wrong read_length"
+    if ex.read_type != read_type:
+        print "wrong read_type"
+    if int(ex.results) is not int(results):
+        print "wrong results"
+        print int(results)
+        print int(ex.results)
+
 def add_sample(antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_type,sample_id,scientist,status,tissue_type,treatment):
+    print sample_id
     obj, created = Sample.objects.get_or_create(antibody=antibody,barcode=barcode,celltype=celltype,comments = comments,descr = descr, exptype=exptype, genotype = genotype, organism = organism, preparation_type = preparation_type,sample_id = sample_id,  scientist = scientist,status=status, tissue_type = tissue_type, treatment = treatment)
     return(obj)
 
@@ -39,6 +57,10 @@ def add_scientist(name):
     return(obj)
 
 def add_flowlane(mdsum,name,read_length,read_type,results):
+    ## check if flowlane exists, if so is it the same
+    if Flowlane.objects.filter(pk=name).exists():
+        print name
+        check_if_identical(mdsum,name,read_length,read_type,results)
     obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
     return(obj)
 
@@ -77,6 +99,7 @@ def getBarcodeStrings(flowlane):
 
 def extractAndAdd_flowlane(sample):
     if not sample.status=="Ready": ## sample results not finished
+        print "sample not ready"
         return None
     print "query forskalle " + str(sample.sample_id)
     forkalleapi('runs/sample/'+str(sample.sample_id),'temp.json')
@@ -99,6 +122,7 @@ def extractAndAdd_flowlane(sample):
                 md5 = cc[i]['md5']
         else:
             md5 = None
+
         flow=add_flowlane(md5,name,readlen,readtype,results)
         link_sample_flowlane(sample,flow)
     os.remove('temp.json') # remove temp file to avoid getting samples mixed up
@@ -113,7 +137,6 @@ def createEntries(json):
         sc=add_scientist(name=d['scientist'])
         if d['secondary_tag'] is not None:
             mbc=d['tag']+d['secondary_tag']
-        #mbc=d['secondary_tag']
         else:
             mbc=d['tag']
         ns=add_sample(antibody=d['antibody'],barcode=mbc,celltype=d['celltype'],comments=d['comments'],descr=d['descr'],exptype=d['exptype'],genotype=d['genotype'].rstrip(),organism=d['organism'],preparation_type=d['preparation_type'],sample_id=d['id'],scientist=sc,status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
@@ -166,6 +189,7 @@ if __name__ == '__main__':
     ## start
     print "samples from forskalle"
     forkalleapi('samples?group=Berger&since='+time,gjson)
+    #forkalleapi('samples?group=Berger&to=2017-01-01&from=2000-10-01',gjson)
     print "creating sample from json"
     createEntries(gjson)
     print "generating barcode strings"
@@ -175,7 +199,7 @@ if __name__ == '__main__':
     print "number of flowlanes: " + str(len(fl))
     for i in fl:
         print i.name, i.barcode
-        print "number of samples: " + str(len(sa))
+    print "number of samples: " + str(len(sa))
 
 ## okat 15352
 ##16844, 32315
