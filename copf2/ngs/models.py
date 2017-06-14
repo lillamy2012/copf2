@@ -43,13 +43,6 @@ class Flowlane(models.Model):
     def __unicode__(self):
         return unicode(self.name)
 
-################
-## Demultiplex
-################
-class Rawfile(models.Model):
-    id = models.IntegerField()
-    name = models.CharField(max_length=200,null=True)
-    sample = models.ForeignKey(Sample)
 
 ################
 ## Sample
@@ -85,4 +78,10 @@ class Sample(models.Model):
        return self._meta.get_field(field).verbose_name#this will get the field
 
     
+################
+## Demultiplex
+################
+class Rawfile(models.Model):
+    name = models.CharField(max_length=200,null=True)
+    sample = models.ForeignKey(Sample)
 

@@ -2,12 +2,13 @@ import sys, getopt
 import os
 import requests
 import json
+import glob
 
 ##################################################
 ### help functions
 ##################################################
 
-### functions for reading json and query forskalle
+### functions for reading json and query forskalle and to get files from path
 
 def read_json(jsonf):
     with open(jsonf, 'r') as json_file:
@@ -28,12 +29,15 @@ def forkalleapi(what,where): ### taken from forskalle api documentation page
     with open(where, "w") as outfile:
         json.dump(alljson, outfile)
 
-### functions for adding entries to db (sample, scientist and flowlane (flowcell+lane)
+def getBamFiles(path): # get all bam files in folder
+    bamFiles=glob.glob(path+'/*.bam')
+    return(bamFiles)
+
+
+## extra function to debug
 
 def check_if_identical(mdsum,name,read_length,read_type,results):
     ex=Flowlane.objects.get(pk=name)
-    #print mdsum
-    #print ex.mdsum
     if ex.mdsum != mdsum:
         print "wrong mdsum"
         print ex.mdsum
@@ -47,8 +51,14 @@ def check_if_identical(mdsum,name,read_length,read_type,results):
         print int(results)
         print int(ex.results)
 
+### functions for adding entries to db (sample, scientist, flowlane (flowcell+lane) and rawfile)
+
+
+def add_rawfile(name,sample):
+    obj, created = Rawfile.objects.get_or_create(name=name,sample=sample)
+    return(obj)
+
 def add_sample(antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_type,sample_id,scientist,status,tissue_type,treatment):
-    print sample_id
     obj, created = Sample.objects.get_or_create(antibody=antibody,barcode=barcode,celltype=celltype,comments = comments,descr = descr, exptype=exptype, genotype = genotype, organism = organism, preparation_type = preparation_type,sample_id = sample_id,  scientist = scientist,status=status, tissue_type = tissue_type, treatment = treatment)
     return(obj)
 
@@ -82,6 +92,15 @@ def update_flowlane_barcodes(flowlane,barcodestring):
 #####################################################
 ### main functions
 #####################################################
+
+#### function that create rawfiles
+def checkIfThere(files,sample):
+    id=str(sample.pk)
+    f_list=list()
+    for f in files:
+        if id in f:
+            add_rawfile(name=f,sample=sample)
+
 
 #### function to create barcodestring per flowlane and updating the flowlane with this info
 
@@ -127,7 +146,12 @@ def extractAndAdd_flowlane(sample):
         link_sample_flowlane(sample,flow)
     os.remove('temp.json') # remove temp file to avoid getting samples mixed up
 
+### wrapper function for rawfiles
 
+def createRawfileEntries(sampleList,path):
+    files=getBamFiles(path)
+    for sample in sampleList:
+        checkIfThere(files,sample)
 
 ### wrapper function to create scientists, samples and flowlanes from group json
 
@@ -184,22 +208,28 @@ if __name__ == '__main__':
     from django.core.wsgi import get_wsgi_application
     os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
     application = get_wsgi_application()
-    from ngs.models import Sample, Scientist, Flowlane
+    from ngs.models import Sample, Scientist, Flowlane, Rawfile
     
     ## start
     print "samples from forskalle"
     forkalleapi('samples?group=Berger&since='+time,gjson)
     #forkalleapi('samples?group=Berger&to=2017-01-01&from=2000-10-01',gjson)
     print "creating sample from json"
-    createEntries(gjson)
+    #createEntries(gjson)
     print "generating barcode strings"
-    update_all_flowlanes()
+    #update_all_flowlanes()
+    ## createRawfiles
+    path = "/Users/elin.axelsson/berger_group/lab/Raw/demultiplexed/"
+    sampleList=Sample.objects.all()
+    createRawfileEntries(sampleList,path)
     fl = Flowlane.objects.all()
     sa = Sample.objects.all()
+    rf = Rawfile.objects.all()
     print "number of flowlanes: " + str(len(fl))
     for i in fl:
         print i.name, i.barcode
     print "number of samples: " + str(len(sa))
+    print "number of files: " + str(len(rf))
 
 ## okat 15352
 ##16844, 32315
