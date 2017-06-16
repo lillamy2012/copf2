@@ -48,7 +48,6 @@ class Flowlane(models.Model):
 ## Sample
 ################
 class Sample(models.Model):
-    #align = models.CharField(max_length=200,null=True)
     antibody = models.CharField(max_length=20)
     barcode = models.CharField(max_length=20,null=True)
     celltype = models.CharField(max_length=20)
@@ -77,11 +76,14 @@ class Sample(models.Model):
     def get_entry(self,field):
        return self._meta.get_field(field).verbose_name#this will get the field
 
-    
+
 ################
 ## Demultiplex
 ################
 class Rawfile(models.Model):
     name = models.CharField(max_length=200,null=True)
-    sample = models.ForeignKey(Sample)
+    sample = models.ForeignKey(Sample,related_name="related_sample")
+
+    def __unicode__(self):
+        return unicode(self.name)
 

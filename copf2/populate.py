@@ -99,7 +99,9 @@ def checkIfThere(files,sample):
     f_list=list()
     for f in files:
         if id in f:
-            add_rawfile(name=f,sample=sample)
+            base=os.path.basename(f)
+            print base
+            add_rawfile(name=base,sample=sample)
 
 
 #### function to create barcodestring per flowlane and updating the flowlane with this info
@@ -215,9 +217,9 @@ if __name__ == '__main__':
     forkalleapi('samples?group=Berger&since='+time,gjson)
     #forkalleapi('samples?group=Berger&to=2017-01-01&from=2000-10-01',gjson)
     print "creating sample from json"
-    #createEntries(gjson)
+    createEntries(gjson)
     print "generating barcode strings"
-    #update_all_flowlanes()
+    update_all_flowlanes()
     ## createRawfiles
     path = "/Users/elin.axelsson/berger_group/lab/Raw/demultiplexed/"
     sampleList=Sample.objects.all()

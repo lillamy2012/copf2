@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.db import models
 from ngs.models import Sample, Scientist, Flowlane
 from ngs.tables import ScientistTable, SampleTable, FlowlaneTable
+from ngs.filters import SampleFilter
 from django_tables2 import RequestConfig
 
 # Create your views here.
@@ -21,18 +22,14 @@ def scientists(request):
     return render(request, 'scientists.html', {'table': table})
 
 def samples(request):
-    flowlane = request.GET.get('flowlane')
-    if flowlane == None:
-        scientist = request.GET.get('scientist')
-        if scientist == None:
-            table = SampleTable(Sample.objects.all())
-        else:
-            table = SampleTable(Sample.objects.filter(scientist=scientist))
-    else:
-        table = SampleTable(Sample.objects.filter(flowlane=flowlane))
-
+    queryset=Sample.objects.select_related().all()
+    data = request.GET.copy()
+    if 'status' not in data:
+        data['status'] = 'Ready'
+    f = SampleFilter(data,queryset=queryset)
+    table = SampleTable(f.qs)
     RequestConfig(request).configure(table)
-    return render(request, 'scientists.html', {'table': table})
+    return render(request, 'samples.html', {'table': table, 'filter':f})
 
 def flowlanes(request):
     table = FlowlaneTable(Flowlane.objects.all())
