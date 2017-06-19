@@ -33,8 +33,16 @@ def getBamFiles(path): # get all bam files in folder
     bamFiles=glob.glob(path+'/*.bam')
     return(bamFiles)
 
+### function to check if status has changed and than update:
 
-## extra function to debug
+def check_and_update_sample_status(sample_id,status):
+    ex=Sample.objects.get(pk=sample_id)
+    if ex.status != status:
+        print "status has changed"
+        ex.status = status
+        ex.save()
+
+### extra function to debug (flowlane)
 
 def check_if_identical(mdsum,name,read_length,read_type,results):
     ex=Flowlane.objects.get(pk=name)
@@ -51,16 +59,8 @@ def check_if_identical(mdsum,name,read_length,read_type,results):
         print int(results)
         print int(ex.results)
 
-def check_and_update_sample_status(sample_id,status):
-    ex=Sample.objects.get(pk=sample_id)
-    if ex.status != status:
-        print "status has changed"
-        ex.status = status
-        ex.save()
-
 ### functions for adding entries to db (sample, scientist, flowlane (flowcell+lane) and rawfile)
 
-def add_rawfile
 
 def add_rawfile(name,sample):
     obj, created = Rawfile.objects.get_or_create(name=name,sample=sample)
@@ -98,6 +98,19 @@ def update_flowlane_barcodes(flowlane,barcodestring):
     obj.update(barcode=barcodestring)
     return(obj)
 
+### function to add file name of multiplex
+
+def add_storage(flowlane,file):
+    obj = Flowlane.objects.get(name=flowlane.name)
+    #check if storage exists if so is it the same
+    if obj.storage and obj.storage != file:
+        print flowlane.name
+        raise Exception("More than one multiplex file!!")
+    else:
+        obj.storage=file
+        obj.save()
+
+
 
 
 #####################################################
@@ -105,14 +118,16 @@ def update_flowlane_barcodes(flowlane,barcodestring):
 #####################################################
 
 #### function that create rawfiles
-def checkIfThere(files,sample):
+def checkIfThere(files,sample,type):
     id=str(sample.pk)
     f_list=list()
     for f in files:
         if id in f:
             base=os.path.basename(f)
-            print base
-            add_rawfile(name=base,sample=sample)
+            if type == "raw":
+                add_rawfile(name=base,sample=sample)
+            elif type == "storage":
+                add_storage(flowlane=sample,file=base)
 
 
 #### function to create barcodestring per flowlane and updating the flowlane with this info
@@ -161,10 +176,10 @@ def extractAndAdd_flowlane(sample):
 
 ### wrapper function for rawfiles
 
-def createRawfileEntries(sampleList,path):
+def createRawfileEntries(sampleList,path,type):
     files=getBamFiles(path)
     for sample in sampleList:
-        checkIfThere(files,sample)
+        checkIfThere(files,sample,type)
 
 ### wrapper function to create scientists, samples and flowlanes from group json
 
@@ -239,7 +254,10 @@ if __name__ == '__main__':
     ## createRawfiles
     path = "/Users/elin.axelsson/berger_group/lab/Raw/demultiplexed/"
     sampleList=Sample.objects.all()
-    createRawfileEntries(sampleList,path)
+    createRawfileEntries(sampleList,path,"raw")
+    path = "/Users/elin.axelsson/berger_group/lab/Raw/multiplexed/"
+    flowList=Flowlane.objects.all()
+    createRawfileEntries(flowList,path,"storage")
     fl = Flowlane.objects.all()
     sa = Sample.objects.all()
     rf = Rawfile.objects.all()
