@@ -60,6 +60,7 @@ def check_and_update_sample_status(sample_id,status):
 
 ### functions for adding entries to db (sample, scientist, flowlane (flowcell+lane) and rawfile)
 
+def add_rawfile
 
 def add_rawfile(name,sample):
     obj, created = Rawfile.objects.get_or_create(name=name,sample=sample)

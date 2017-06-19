@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django_tables2',
     'bootstrap_toolkit',
     'ngs',
+    'widget_tweaks',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -32,7 +32,6 @@ class Flowlane(models.Model):
                          )
     barcode = models.CharField(max_length=1000,null=True)
     mdsum = models.CharField(max_length=200,null=True)
-    #multi_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200,primary_key=True)
     read_length = models.IntegerField()
     read_type = models.CharField(max_length=2,choices=READ_TYPE_CHOICES)
@@ -48,15 +47,32 @@ class Flowlane(models.Model):
 ## Sample
 ################
 class Sample(models.Model):
+    
+    ORGANISM_CHOICES = (
+                        ('Arabidopsis thaliana','Arabidopsis thaliana'),
+                        ('Marchantia polymorpha','Marchantia polymorpha'),
+                        ('Hornwort','Hornwort'),
+                        ('Homo sapiens', 'Homo sapiens'),
+                        ('S. pombe','S. pombe'),
+                       )
+                       
+    EXPTYPE_CHOICES = (
+                        ('ChIP-Seq', 'ChIP-Seq'),
+                        ('Hi-C','Hi-C'),
+                        ('MNase-Seq','MNase-Seq'),
+                        ('Whole-Genome','Whole-Genome'),
+                        ('RNA-Seq','RNA-Seq'),
+                       )
+                       
     antibody = models.CharField(max_length=20)
     barcode = models.CharField(max_length=20,null=True)
     celltype = models.CharField(max_length=20)
     comments = models.CharField(max_length=200)
     descr = models.CharField(max_length=200)
-    exptype = models.CharField(max_length=20)
+    exptype = models.CharField(max_length=20,choices=EXPTYPE_CHOICES)
     flowlane = models.ManyToManyField("Flowlane",blank=True, null=True)
     genotype = models.CharField(max_length=10)
-    organism = models.CharField(max_length=20)
+    organism = models.CharField(max_length=20,choices=ORGANISM_CHOICES)
     preparation_type = models.CharField(max_length=200)
     sample_id = models.IntegerField(primary_key=True)
     scientist = models.ForeignKey(Scientist)
