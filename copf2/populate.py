@@ -51,6 +51,13 @@ def check_if_identical(mdsum,name,read_length,read_type,results):
         print int(results)
         print int(ex.results)
 
+def check_and_update_sample_status(sample_id,status):
+    ex=Sample.objects.get(pk=sample_id)
+    if ex.status != status:
+        print "status has changed"
+        ex.status = status
+        ex.save()
+
 ### functions for adding entries to db (sample, scientist, flowlane (flowcell+lane) and rawfile)
 
 
@@ -59,6 +66,9 @@ def add_rawfile(name,sample):
     return(obj)
 
 def add_sample(antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_type,sample_id,scientist,status,tissue_type,treatment):
+    if Sample.objects.filter(pk=sample_id).exists():
+        print sample_id
+        check_and_update_sample_status(sample_id,status)
     obj, created = Sample.objects.get_or_create(antibody=antibody,barcode=barcode,celltype=celltype,comments = comments,descr = descr, exptype=exptype, genotype = genotype, organism = organism, preparation_type = preparation_type,sample_id = sample_id,  scientist = scientist,status=status, tissue_type = tissue_type, treatment = treatment)
     return(obj)
 
@@ -203,6 +213,7 @@ def inarg(argv):
 
 
 if __name__ == '__main__':
+    
     time = inarg(sys.argv[1:])
     gjson="group_"+time.replace('+','_')+".json"
     print gjson
@@ -211,6 +222,10 @@ if __name__ == '__main__':
     os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
     application = get_wsgi_application()
     from ngs.models import Sample, Scientist, Flowlane, Rawfile
+    
+    #sa =Sample.objects.get(pk=52521)
+    #print sa.flowlane.all()
+
     
     ## start
     print "samples from forskalle"
@@ -236,5 +251,3 @@ if __name__ == '__main__':
 ## okat 15352
 ##16844, 32315
 ## check problematic sample
-#sa =Sample.objects.get(pk=16844)
-#print sa.flowlane.all()
