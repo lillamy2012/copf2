@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
+TEMPLATE_CONTEXT_PROCESSORS += ('django.core.context_processors.request',)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -22,7 +24,6 @@ SECRET_KEY = '3et@o2(!%n2qo9&$q@+hwk^3(1!&&_9opdhp2ne_r+r7ncsr8l'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -60,6 +61,7 @@ TEMPLATES = [
              'BACKEND': 'django.template.backends.django.DjangoTemplates',
              'APP_DIRS': True,
              'OPTIONS': {
+                'debug': DEBUG,
              'context_processors': [
                                     # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
                                     # list if you haven't customized them:
@@ -70,7 +72,7 @@ TEMPLATES = [
                                     'django.template.context_processors.static',
                                     'django.template.context_processors.tz',
                                     'django.contrib.messages.context_processors.messages',
-                                    'django.core.context_processors.request',
+                                    'django.template.context_processors.request',
                                     ],
              },
              

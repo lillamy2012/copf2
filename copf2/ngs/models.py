@@ -70,7 +70,7 @@ class Sample(models.Model):
     comments = models.CharField(max_length=200)
     descr = models.CharField(max_length=200)
     exptype = models.CharField(max_length=20,choices=EXPTYPE_CHOICES)
-    flowlane = models.ManyToManyField("Flowlane",blank=True, null=True)
+    flowlane = models.ManyToManyField("Flowlane",blank=True)
     genotype = models.CharField(max_length=10)
     organism = models.CharField(max_length=20,choices=ORGANISM_CHOICES)
     preparation_type = models.CharField(max_length=200)
