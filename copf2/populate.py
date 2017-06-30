@@ -47,17 +47,27 @@ def check_and_update_sample_status(sample_id,status):
 def check_if_identical(mdsum,name,read_length,read_type,results):
     ex=Flowlane.objects.get(pk=name)
     if ex.mdsum != mdsum:
-        print "wrong mdsum"
-        print ex.mdsum
-        print mdsum
+        if ex.mdsum is None:
+            print "mdsum has been provided"
+            ex.mdsum = mdsum
+            ex.save()
+        else:
+            print "wrong mdsum"
+            print ex.mdsum
+            print mdsum
     if ex.read_length != read_length:
         print "wrong read_length"
     if ex.read_type != read_type:
         print "wrong read_type"
     if int(ex.results) is not int(results):
-        print "wrong results"
-        print int(results)
-        print int(ex.results)
+        if int(ex.results) == 0:
+            print "results are in"
+            ex.results = results
+            ex.save()
+        else:
+            print "wrong results"
+            print int(results)
+            print int(ex.results)
 
 ### functions for adding entries to db (sample, scientist, flowlane (flowcell+lane) and rawfile)
 
