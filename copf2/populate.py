@@ -33,14 +33,29 @@ def getBamFiles(path): # get all bam files in folder
     bamFiles=glob.glob(path+'/*.bam')
     return(bamFiles)
 
+def checkAll(sample_id,antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_type,scientist,status,tissue_type,treatment):
+    ex=Sample.objects.get(pk=sample_id)
+    print ex.antibody
+    print antibody
+    print ex.barcode
+    print barcode
+    print ex.celltype
+    print celltype
+
 ### function to check if status has changed and than update:
 
-def check_and_update_sample_status(sample_id,status):
+def check_and_update_sample_status(sample_id,status,barcode):
     ex=Sample.objects.get(pk=sample_id)
     if ex.status != status:
         print "status has changed"
+        print status
         ex.status = status
-        ex.save()
+    if ex.barcode != barcode:
+        print "barcode has changed"
+        ex.barcode = barcode
+    print "saving"
+    ex.save()
+
 
 ### extra function to debug (flowlane)
 
@@ -78,9 +93,10 @@ def add_rawfile(name,sample):
 
 def add_sample(antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_type,sample_id,scientist,status,tissue_type,treatment):
     if Sample.objects.filter(pk=sample_id).exists():
-        print sample_id
-        check_and_update_sample_status(sample_id,status)
+        check_and_update_sample_status(sample_id,status,barcode)
+    print "add"
     obj, created = Sample.objects.get_or_create(antibody=antibody,barcode=barcode,celltype=celltype,comments = comments,descr = descr, exptype=exptype, genotype = genotype, organism = organism, preparation_type = preparation_type,sample_id = sample_id,  scientist = scientist,status=status, tissue_type = tissue_type, treatment = treatment)
+    print "added"
     return(obj)
 
 def add_scientist(name):
