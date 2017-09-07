@@ -1,4 +1,4 @@
-from ngs.models import Sample,  Scientist
+from ngs.models import Sample,  Scientist, Flowlane
 from django import forms
 import django_filters
 from django_filters import filters
@@ -10,3 +10,9 @@ class SampleFilter(django_filters.FilterSet):
     class Meta:
         model = Sample
         fields = ['exptype','scientist','status','flowlane','organism','sample_id']
+
+
+class FlowlaneFilter(django_filters.FilterSet):
+    class Meta:
+        model = Flowlane
+        fields = ['name','results']

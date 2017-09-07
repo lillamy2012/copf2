@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.db import models
 from ngs.models import Sample, Scientist, Flowlane
 from ngs.tables import ScientistTable, SampleTable, FlowlaneTable
-from ngs.filters import SampleFilter
+from ngs.filters import SampleFilter, FlowlaneFilter
 from django_tables2 import RequestConfig
 
 # Create your views here.
@@ -32,9 +32,13 @@ def samples(request):
     return render(request, 'samples.html', {'table': table, 'filter':f})
 
 def flowlanes(request):
-    table = FlowlaneTable(Flowlane.objects.all())
+    queryset=Flowlane.objects.select_related().all()
+    data = request.GET.copy()
+    f = FlowlaneFilter(data,queryset=queryset)
+    table = FlowlaneTable(f.qs)
+    data = request.GET.copy()
     RequestConfig(request).configure(table)
-    return render(request, 'scientists.html', {'table': table})
+    return render(request, 'scientists.html', {'table': table, 'filter':f})
 
 
 

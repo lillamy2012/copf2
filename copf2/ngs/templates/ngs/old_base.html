@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+{% load bootstrap_toolkit %}
+
+<!--{% load render_table from django_tables2 %}-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Copf2</title>
+    <meta name="description" content="">
+    <meta name="author" content="Elin Axelsson">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <style>
+      body {
+      padding-top: 60px;
+      }
+    </style>
+    <!--[if lt IE 9]>
+	<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+
+    <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+  </head>
+  <body>
+
+    <div class="navbar navbar-default">
+      <!--<div class="navbar-inner"> -->
+        <div class="container">
+          <a class="navbar-brand" href="/index">collections of projects files2</a>
+
+              <form class="navbar-form navbar-left"
+                  action="/samples/",method="link">
+                  <input name="sample_id" class="search-query input-small" placeholder="search sample">
+            </form>
+
+<form class="navbar-form navbar-left"
+                  action="/flowlanes/",method="link">
+                  <input name="name" class="search-query input-small" placeholder="search flowlane">
+            </form>
+
+
+        </div>
+      <!--</div>-->
+    </div>
+    <!--{% block header1 %} {% endblock %}
+    {% block table_black %} {% endblock %} -->
+    {% block body_block %}This is body_block's default content.{% endblock %}
+    <!--{% block messages %} {% endblock %}
+    {% block links %} {% endblock %} -->
+
+</body>
+
+
+
+  <footer class="row">
+
+    <div class='row'>
+      <hr>
+      </div>
+      <p>
+	<div class="span8">
+          <a href="https://github.com/lillamy2012/copf2/blob/master/README.md"> Copf2</a>:
+          the Berger group's official app for NGS project organisation </p>
+      </div>
+
+      <div class="span5">
+	<p>
+          elin.axelsson@gmi.oeaw.ac.at
+
+	</p>
+      </div>
+
+ </footer>
+
+</html>
