@@ -1,31 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="utf-8">
     <title>Copf2</title>
-    <style type="text/css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <style>
       body {
-      padding-top: 60px;  <!--space to top>
+      padding-top: 0px;  <!--space to top>
       }
     </style>
+    <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
   </head>
   <body>
-    <div>
-      <a href="/index">collections of projects files2</a>
-      <form action="/samples/",method="link">
-        <input name="sample_id" placeholder="search sample">
+    <div class="navbar navbar-default">
+      <div class="container">
+        <a class="navbar-brand" href="/index">collections of projects files2</a>
+      <form class="navbar-form navbar-left" action="/samples/",method="link">
+        <input class="form-control" placeholder="search sample">
       </form>
-
-      <form action="/flowlanes/",method="link">
-        <input name="name" placeholder="search flowlane">
+      <form  class="navbar-form navbar-left" action="/flowlanes/",method="link">
+        <input class="form-control" placeholder="search flowlane">
       </form>
+      </div>
     </div>
     {% block body_block %}
     {% endblock %}
   </body>
 
-  <footer class="row">
+  <footer>
     <hr>
-    <a href="https://github.com/lillamy2012/copf2/blob/master/README.md"> Copf2</a>: the Berger group's official app for NGS project organisation </p>
-    elin.axelsson@gmi.oeaw.ac.at
-  </footer>
+      <div class="container">
+        <a href="https://github.com/lillamy2012/copf2/blob/master/README.md"> Copf2</a>: the Berger group's official app for NGS project organisation </p>
+        elin.axelsson@gmi.oeaw.ac.at
+      </div>
+    </footer>
 </html>
