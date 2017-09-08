@@ -10,17 +10,19 @@
       padding-top: 0px;  <!--space to top>
       }
     </style>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'ngs/themes/extra_style.css' %}"/>
     <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
   </head>
   <body>
     <div class="navbar navbar-default">
-      <div class="container">
+      <div class="container-fluid">
         <a class="navbar-brand" href="/index">collections of projects files2</a>
       <form class="navbar-form navbar-left" action="/samples/",method="link">
-        <input class="form-control" placeholder="search sample">
+        <input name="sample_id" class="form-control" placeholder="search sample">
       </form>
       <form  class="navbar-form navbar-left" action="/flowlanes/",method="link">
-        <input class="form-control" placeholder="search flowlane">
+        <input name="name" class="form-control" placeholder="search flowlane">
       </form>
       </div>
     </div>
@@ -28,9 +30,9 @@
     {% endblock %}
   </body>
 
-  <footer>
+  <footer class="footer">
     <hr>
-      <div class="container">
+      <div class="container-fluid">
         <a href="https://github.com/lillamy2012/copf2/blob/master/README.md"> Copf2</a>: the Berger group's official app for NGS project organisation </p>
         elin.axelsson@gmi.oeaw.ac.at
       </div>

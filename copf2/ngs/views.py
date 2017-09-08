@@ -38,7 +38,7 @@ def flowlanes(request):
     table = FlowlaneTable(f.qs)
     data = request.GET.copy()
     RequestConfig(request).configure(table)
-    return render(request, 'scientists.html', {'table': table, 'filter':f})
+    return render(request, 'flowlanes.html', {'table': table, 'filter':f})
 
 
 
