@@ -63,6 +63,13 @@ class Sample(models.Model):
                         ('Whole-Genome','Whole-Genome'),
                         ('RNA-Seq','RNA-Seq'),
                        )
+    STATUS_CHOICES = (
+                      ('Ready', 'Ready'),
+                      ('Prepared', 'Prepered'),
+                      ('Submitted', 'Submitted'),
+                      ('Onhold','Onhold'),
+                      ('Aborted','Aborted'),
+                      )
                        
     antibody = models.CharField(max_length=20)
     barcode = models.CharField(max_length=20,null=True)
@@ -76,7 +83,7 @@ class Sample(models.Model):
     preparation_type = models.CharField(max_length=200)
     sample_id = models.IntegerField(primary_key=True)
     scientist = models.ForeignKey(Scientist)
-    status = models.CharField(max_length=20)
+    status = models.CharField(max_length=20,choices=STATUS_CHOICES)
     tissue_type = models.CharField(max_length=20)
     treatment = models.CharField(max_length=200)
     
