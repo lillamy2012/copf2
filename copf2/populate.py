@@ -151,6 +151,7 @@ def checkIfThere(files,sample,type):
         if id in f:
             base=os.path.basename(f)
             if type == "raw":
+		print base
                 add_rawfile(name=base,sample=sample)
             elif type == "storage":
                 add_storage(flowlane=sample,file=base)
@@ -278,10 +279,12 @@ if __name__ == '__main__':
     print "generating barcode strings"
     update_all_flowlanes()
     ## createRawfiles
-    path = "/Users/elin.axelsson/berger_group/lab/Raw/demultiplexed/"
+    #path = "/Users/elin.axelsson/berger_group/lab/Raw/demultiplexed/"
+    path = "/home/mount/lab/Raw/demultiplexed/"
     sampleList=Sample.objects.all()
     createRawfileEntries(sampleList,path,"raw")
-    path = "/Users/elin.axelsson/berger_group/lab/Raw/multiplexed/"
+    #path = "/Users/elin.axelsson/berger_group/lab/Raw/multiplexed/"
+    path = "/home/mount/lab/Raw/multiplexed"
     flowList=Flowlane.objects.all()
     createRawfileEntries(flowList,path,"storage")
     fl = Flowlane.objects.all()
