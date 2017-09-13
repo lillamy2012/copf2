@@ -5,6 +5,7 @@ from ngs.models import Sample, Scientist, Flowlane
 from ngs.tables import ScientistTable, SampleTable, FlowlaneTable
 from ngs.filters import SampleFilter, FlowlaneFilter
 from django_tables2 import RequestConfig
+from django_tables2.export.export import TableExport
 
 # Create your views here.
 
@@ -29,6 +30,11 @@ def samples(request):
     f = SampleFilter(data,queryset=queryset)
     table = SampleTable(f.qs)
     RequestConfig(request).configure(table)
+    export_format = request.GET.get('_export', None)
+    if TableExport.is_valid_format(export_format):
+        exporter = TableExport(export_format, table)
+        return exporter.response('table.{}'.format(export_format))
+    
     return render(request, 'samples.html', {'table': table, 'filter':f})
 
 def flowlanes(request):

@@ -3,6 +3,7 @@ from ngs.models import Scientist, Sample, Flowlane, Rawfile
 from django_tables2.utils import A  # alias for Accessor
 from django.core.urlresolvers import reverse
 from django.utils.html import format_html
+from django_tables2 import SingleTableView
 
 class ScientistTable(tables.Table):
     class Meta:
@@ -50,6 +51,11 @@ class SampleTable(tables.Table):
 
         #return ', '.join([raw_file.name for rawfile in value.all()])
 #
+
+class SampleList(SingleTableView):
+    model = Sample
+    table_class = SampleTable
+
 
 class FlowlaneTable(tables.Table):
     class Meta:
