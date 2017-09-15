@@ -82,10 +82,11 @@ class Sample(models.Model):
     organism = models.CharField(max_length=20,choices=ORGANISM_CHOICES)
     preparation_type = models.CharField(max_length=200)
     sample_id = models.IntegerField(primary_key=True)
-    scientist = models.ForeignKey(Scientist)
+    scientist = models.ForeignKey(Scientist,related_name="related_scientist")
     status = models.CharField(max_length=20,choices=STATUS_CHOICES)
     tissue_type = models.CharField(max_length=20)
     treatment = models.CharField(max_length=200)
+    curated = models.BooleanField(default=False)
     
     def got_flowlane(self):
         return len(self.flowlane_set.all())

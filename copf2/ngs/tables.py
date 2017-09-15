@@ -11,20 +11,43 @@ class ScientistTable(tables.Table):
         attrs = {"class": "paleblue"}
 
     name= tables.LinkColumn('samples', text='A(name)')
+    num = tables.Column(empty_values=(),verbose_name="# Samples")
+    curated= tables.Column(empty_values=(),verbose_name="# Curated Samples")
+    
+    def render_curated(self,record):
+        cur= len(Sample.objects.filter(scientist=record.name).filter(curated=True))
+        return cur
+    
+    def order_curated(self, queryset, is_descending):
+        name = getattr(self.data, 'model')
+        queryset = queryset.annotate(
+            length=len(Sample.objects.filter(scientist=name).filter(curated=True))
+        ).order_by(('-' if is_descending else '') + 'length')
+        return (queryset, True)
+    
+    def render_num(self,record):
+        nrsamples = len(Sample.objects.filter(scientist=record.name))
+        return nrsamples
 
     def render_name(self, record):
+        cur= len(Sample.objects.filter(scientist=record.name).filter(curated=True))
+        nrsamples = len(Sample.objects.filter(scientist=record.name))
+        proc = cur/nrsamples
         url = reverse('samples')
-        return format_html('<a href="{}?scientist={}">{}</a>', url, record.name ,  record.name)
+        if proc > 0.8:
+            return format_html('<span class="glyphicon glyphicon-star" style="color:gold" ></span> <a href="{}?scientist={}">{}</a>', url, record.name ,  record.name)
+        else:
+            return format_html('<a href="{}?scientist={}">{}</a>', url, record.name ,  record.name)
 
 class SampleTable(tables.Table):
     class Meta:
         model = Sample
         attrs = {"class": "paleblue"}
         sequence = ('sample_id','barcode','flow_name')
-
     flow_name = tables.Column(accessor="flowlane", verbose_name="Flowlane")
     raw_file = tables.Column(accessor="related_sample",verbose_name="Raw files")
     scientist= tables.LinkColumn('samples', text='A(scientist)')
+    curated =  tables.BooleanColumn(yesno='1,2')
     
     def render_flow_name(self, value ):
         if value is not None:
