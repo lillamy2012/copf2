@@ -47,7 +47,7 @@ class SampleTable(tables.Table):
     flow_name = tables.Column(accessor="flowlane", verbose_name="Flowlane")
     raw_file = tables.Column(accessor="related_sample",verbose_name="Raw files")
     scientist= tables.LinkColumn('samples', text='A(scientist)')
-    curated =  tables.BooleanColumn(yesno='1,2')
+    
     
     def render_flow_name(self, value ):
         if value is not None:
