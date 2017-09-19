@@ -114,8 +114,8 @@ class Rawfile(models.Model):
 ################
 ## Status
 ################
-class Status(models.Model):
-    sample = models.ForeignKey(Sample,related_name="related_sampleID")
+class State(models.Model):
+    sample = models.ForeignKey(Sample,related_name="related_id")
     review = models.BooleanField(default=False)
     curated = models.NullBooleanField()
     changed = models.NullBooleanField()

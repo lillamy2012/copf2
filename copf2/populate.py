@@ -156,10 +156,10 @@ def checkIfThere(files,sample,type):
                 add_storage(flowlane=sample,file=base)
 
 #### function that creates status
-def createStatus(sample):
+def createState(sample):
     print sample
-    if not Status.objects.filter(pk=sample.pk).exists():
-        obj, created = Status.objects.get_or_create(sample=sample,review=False,curated=None,changed=None)
+    if not State.objects.filter(pk=sample.pk).exists():
+        obj, created = State.objects.get_or_create(sample=sample,review=False,curated=None,changed=None)
         return(obj)
 
 #### function to create barcodestring per flowlane and updating the flowlane with this info
@@ -225,7 +225,7 @@ def createEntries(json):
             mbc=d['tag']
         ns=add_sample(antibody=d['antibody'],barcode=mbc,celltype=d['celltype'],comments=d['comments'],descr=d['descr'],exptype=d['exptype'],genotype=d['genotype'].rstrip(),organism=d['organism'],preparation_type=d['preparation_type'],sample_id=d['id'],scientist=sc,status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
         mu=extractAndAdd_flowlane(ns)
-        st=createStatus(ns)
+        st=createState(ns)
 
 ### wrapper to update barstring for all flowlanes in db
 
@@ -271,7 +271,7 @@ if __name__ == '__main__':
     from django.core.wsgi import get_wsgi_application
     os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
     application = get_wsgi_application()
-    from ngs.models import Sample, Scientist, Flowlane, Rawfile, Status
+    from ngs.models import Sample, Scientist, Flowlane, Rawfile, State
     
     #sa =Sample.objects.get(pk=52521)
     #print sa.flowlane.all()
