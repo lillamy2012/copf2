@@ -1,5 +1,5 @@
 import django_tables2 as tables
-from ngs.models import Scientist, Sample, Flowlane, Rawfile, State
+from ngs.models import Scientist, Sample, Flowlane, Rawfile
 from django_tables2.utils import A  # alias for Accessor
 from django.core.urlresolvers import reverse
 from django.utils.html import format_html
@@ -15,9 +15,7 @@ class ScientistTable(tables.Table):
     curated= tables.Column(empty_values=(),verbose_name="# Curated",orderable=False)
     
     def render_curated(self,record):
-        ## get scientist, get list of samples, get states for samples
-        samples = Sample.objects.filter(scientist=record.name).values_list('sample_id',flat=True)
-        cur=len(State.objects.filter(sample__in=samples).filter(curated=True))
+        cur = len(Sample.objects.filter(scientist=record.name).filter(curated=True))
         return cur
     
     def order_curated(self, queryset, is_descending):
@@ -32,9 +30,9 @@ class ScientistTable(tables.Table):
         return nrsamples
 
     def render_name(self, record):
-        samples = Sample.objects.filter(scientist=record.name).values_list('sample_id',flat=True)
-        cur=len(State.objects.filter(sample__in=samples).filter(curated=True))
-        rew=len(State.objects.filter(sample__in=samples).filter(review=True))
+        cur = len(Sample.objects.filter(scientist=record.name).filter(curated=True))
+        rew = len(Sample.objects.filter(scientist=record.name).filter(review=True))
+        
         if rew>0:
             proc = cur/rew
         else:
@@ -51,22 +49,19 @@ class SampleTable(tables.Table):
     class Meta:
         model = Sample
         attrs = {"class": "paleblue"}
-        sequence = ('dataState','sample_id','barcode','flow_name')
+        exclude = ('review','changed')
+        sequence = ('curated','sample_id','barcode','flow_name')
     flow_name = tables.Column(accessor="flowlane", verbose_name="Flowlane")
     raw_file = tables.Column(accessor="related_sample",verbose_name="Raw files")
     scientist= tables.LinkColumn('samples', text='A(scientist)')
-    dataState =  tables.Column(accessor='related_id',verbose_name="Checked",orderable=False)
     
-    def render_dataState(self, value):
-        if value is not None:
-            st=list(value.all())
-            if st[0].curated==True:
-                return format_html('<span class="glyphicon glyphicon-ok-circle" style="font-size:150%;color:rgb(112, 244, 161)" ></span>')
-            else:
-                return format_html('<span class="glyphicon glyphicon-remove-circle" style="font-size:150%;color:pink" ></span>')
-        return '-'
-    
-    
+    def render_curated(self, value):
+        if value is True:
+            return format_html('<span class="glyphicon glyphicon-ok-circle" style="font-size:150%;color:rgb(112, 244, 161)" ></#span>')
+        else:
+            return format_html('<span class="glyphicon glyphicon-remove-circle" style="font-size:150%;color:pink" ></span>')
+
+
     def render_flow_name(self, value ):
         if value is not None:
             return ', '.join([flowlane.name for flowlane in value.all()])

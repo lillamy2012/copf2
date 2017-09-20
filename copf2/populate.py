@@ -33,14 +33,10 @@ def getBamFiles(path): # get all bam files in folder
     bamFiles=glob.glob(path+'/*.bam')
     return(bamFiles)
 
-def checkAll(sample_id,antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_type,scientist,status,tissue_type,treatment):
-    ex=Sample.objects.get(pk=sample_id)
-    print ex.antibody
-    print antibody
-    print ex.barcode
-    print barcode
-    print ex.celltype
-    print celltype
+
+#################################################
+### checks and updates
+#################################################
 
 ### function to check if status has changed and than update:
 
@@ -57,7 +53,7 @@ def check_and_update_sample_status(sample_id,status,barcode):
     ex.save()
 
 
-### extra function to debug (flowlane)
+### function to check flowlanes (should never change!, only results)
 
 def check_if_identical(mdsum,name,read_length,read_type,results):
     ex=Flowlane.objects.get(pk=name)
@@ -84,24 +80,40 @@ def check_if_identical(mdsum,name,read_length,read_type,results):
             print int(results)
             print int(ex.results)
 
-### functions for adding entries to db (sample, scientist, flowlane (flowcell+lane) and rawfile)
 
+###################################################
+### populate scripts
+###################################################
+
+### add Rawfile
 
 def add_rawfile(name,sample):
     obj, created = Rawfile.objects.get_or_create(name=name,sample=sample)
     return(obj)
 
-def add_sample(antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_type,sample_id,scientist,status,tissue_type,treatment):
-    if Sample.objects.filter(pk=sample_id).exists():
-        check_and_update_sample_status(sample_id,status,barcode)
-    print "add"
-    obj, created = Sample.objects.get_or_create(antibody=antibody,barcode=barcode,celltype=celltype,comments = comments,descr = descr, exptype=exptype, genotype = genotype, organism = organism, preparation_type = preparation_type,sample_id = sample_id,  scientist = scientist,status=status, tissue_type = tissue_type, treatment = treatment)
-    print "added"
-    return(obj)
+### add scientists
 
 def add_scientist(name):
     obj, created = Scientist.objects.get_or_create(name = name)
     return(obj)
+
+### add sample
+
+def add_sample(antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_type,sample_id,scientist,status,tissue_type,treatment):
+    if Sample.objects.filter(pk=sample_id).exists():
+        check_and_update_sample_status(sample_id,status,barcode)
+    obj, created = Sample.objects.get_or_create(antibody=antibody,barcode=barcode,celltype=celltype,comments = comments,descr = descr, exptype=exptype, genotype = genotype, organism = organism, preparation_type = preparation_type,sample_id = sample_id,  scientist = scientist,status=status, tissue_type = tissue_type, treatment = treatment)
+    return(obj)
+
+### add (empty) state
+
+def createState(sample):
+    print sample
+    if not State.objects.filter(pk=sample.pk).exists():
+        obj, created = State.objects.get_or_create(sample=sample,review=False,curated=None,changed=None)
+        return(obj)
+
+### add flowlane
 
 def add_flowlane(mdsum,name,read_length,read_type,results):
     ## check if flowlane exists, if so is it the same
@@ -110,6 +122,10 @@ def add_flowlane(mdsum,name,read_length,read_type,results):
         check_if_identical(mdsum,name,read_length,read_type,results)
     obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
     return(obj)
+
+################################################
+### link tables functions
+################################################
 
 ### function to link flowlane to sample (many to many)
 
@@ -136,6 +152,20 @@ def add_storage(flowlane,file):
         obj.storage=file
         obj.save()
 
+####################################################
+###
+
+### function to create barcodestring per flowlane and updating the flowlane with this info
+
+def getBarcodeStrings(flowlane):
+    samples = flowlane.sample_set.all()
+    b=list()
+    for i in samples:
+        b.append(str(i.sample_id)+":"+Sample.objects.get(sample_id=i.sample_id).barcode)
+    bas=",".join(b)
+    up = update_flowlane_barcodes(flowlane,bas)
+    return(up)
+
 
 
 
@@ -155,23 +185,6 @@ def checkIfThere(files,sample,type):
             elif type == "storage":
                 add_storage(flowlane=sample,file=base)
 
-#### function that creates status
-def createState(sample):
-    print sample
-    if not State.objects.filter(pk=sample.pk).exists():
-        obj, created = State.objects.get_or_create(sample=sample,review=False,curated=None,changed=None)
-        return(obj)
-
-#### function to create barcodestring per flowlane and updating the flowlane with this info
-
-def getBarcodeStrings(flowlane):
-    samples = flowlane.sample_set.all()
-    b=list()
-    for i in samples:
-        b.append(str(i.sample_id)+":"+Sample.objects.get(sample_id=i.sample_id).barcode)
-    bas=",".join(b)
-    up = update_flowlane_barcodes(flowlane,bas)
-    return(up)
 
 
 ### function that creates flowlane per sample, using forskalle
@@ -225,7 +238,6 @@ def createEntries(json):
             mbc=d['tag']
         ns=add_sample(antibody=d['antibody'],barcode=mbc,celltype=d['celltype'],comments=d['comments'],descr=d['descr'],exptype=d['exptype'],genotype=d['genotype'].rstrip(),organism=d['organism'],preparation_type=d['preparation_type'],sample_id=d['id'],scientist=sc,status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
         mu=extractAndAdd_flowlane(ns)
-        st=createState(ns)
 
 ### wrapper to update barstring for all flowlanes in db
 
@@ -271,7 +283,7 @@ if __name__ == '__main__':
     from django.core.wsgi import get_wsgi_application
     os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
     application = get_wsgi_application()
-    from ngs.models import Sample, Scientist, Flowlane, Rawfile, State
+    from ngs.models import Sample, Scientist, Flowlane, Rawfile
     
     #sa =Sample.objects.get(pk=52521)
     #print sa.flowlane.all()

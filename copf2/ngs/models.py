@@ -86,7 +86,9 @@ class Sample(models.Model):
     status = models.CharField(max_length=20,choices=STATUS_CHOICES)
     tissue_type = models.CharField(max_length=20)
     treatment = models.CharField(max_length=200)
-    
+    review = models.BooleanField(default=False)
+    curated = models.NullBooleanField(default=None)
+    changed = models.NullBooleanField(default=None)
     
     def got_flowlane(self):
         return len(self.flowlane_set.all())
@@ -110,14 +112,4 @@ class Rawfile(models.Model):
 
     def __unicode__(self):
         return unicode(self.name)
-
-################
-## Status
-################
-class State(models.Model):
-    sample = models.ForeignKey(Sample,related_name="related_id")
-    review = models.BooleanField(default=False)
-    curated = models.NullBooleanField()
-    changed = models.NullBooleanField()
-
 

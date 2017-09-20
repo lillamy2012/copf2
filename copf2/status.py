@@ -51,14 +51,19 @@ def UpdateStatus(type,data):
         sys.exit(2)
 
 def update_review(id):
-    obj, created = State.objects.get_or_create(sample = id)
+    obj, created = Sample.objects.get_or_create(sample_id = id)
+    if created == True:
+        print 'sample entry does not exist' + id
+        sys.exit(2)
     obj.review=True
     if obj.curated is None:
         obj.curated=False
     obj.save()
 
 def update_curated(id):
-    obj, created = State.objects.get_or_create(sample = id)
+    obj, created = Sample.objects.get_or_create(sample_id = id)
+    if created == True:
+        print 'sample entry does not exist' + id
     if obj.review != True:
         print 'sample review status was not true! Check why'
         sys.exit(2)
@@ -68,7 +73,9 @@ def update_curated(id):
     obj.save()
 
 def update_changed(id):
-    obj, created = State.objects.get_or_create(sample = id)
+    obj, created = Sample.objects.get_or_create(sample_id = id)
+    if created == True:
+        print 'sample entry does not exist' + id
     if obj.curated != True:
         print 'sample curated status was not true! Check why'
         sys.exit(2)
@@ -83,7 +90,7 @@ if __name__ == '__main__':
     from django.core.wsgi import get_wsgi_application
     os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
     application = get_wsgi_application()
-    from ngs.models import Sample, Scientist, State
+    from ngs.models import Sample, Scientist
     print "start"
     type, file = inarg(sys.argv[1:])
     print type
@@ -92,8 +99,8 @@ if __name__ == '__main__':
     UpdateStatus(type,samples)
 
 
-    obj, created = State.objects.get_or_create(sample = 52316)
-    print obj.curated
+# obj, created = State.objects.get_or_create(sample = 52316)
+#   print obj.curated
 
 
 
