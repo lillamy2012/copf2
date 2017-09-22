@@ -66,7 +66,7 @@ class Sample(models.Model):
                        )
     STATUS_CHOICES = (
                       ('Ready', 'Ready'),
-                      ('Prepared', 'Prepered'),
+                      ('Prepared', 'Prepared'),
                       ('Submitted', 'Submitted'),
                       ('Onhold','Onhold'),
                       ('Aborted','Aborted'),
@@ -81,7 +81,7 @@ class Sample(models.Model):
     flowlane = models.ManyToManyField("Flowlane",blank=True)
     genotype = models.CharField(max_length=10)
     organism = models.CharField(max_length=20,choices=ORGANISM_CHOICES)
-    preparation_type = models.CharField(max_length=200)
+    preparation_kit = models.CharField(max_length=200,null=True)
     sample_id = models.IntegerField(primary_key=True)
     scientist = models.ForeignKey(Scientist,related_name="related_scientist")
     status = models.CharField(max_length=20,choices=STATUS_CHOICES)

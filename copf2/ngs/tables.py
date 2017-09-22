@@ -49,8 +49,8 @@ class SampleTable(tables.Table):
     class Meta:
         model = Sample
         attrs = {"class": "paleblue"}
-        exclude = ('review','changed','preparation_type')
-        sequence = ('curated','sample_id','barcode','flow_name')
+        exclude = ('review','changed')
+        sequence = ('curated','sample_id')
     flow_name = tables.Column(accessor="flowlane", verbose_name="Flowlane")
     raw_file = tables.Column(accessor="related_sample",verbose_name="Raw files")
     scientist= tables.LinkColumn('samples', text='A(scientist)')
