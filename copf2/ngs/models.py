@@ -62,6 +62,7 @@ class Sample(models.Model):
                         ('MNase-Seq','MNase-Seq'),
                         ('Whole-Genome','Whole-Genome'),
                         ('RNA-Seq','RNA-Seq'),
+                        ('ATAC-Seq','ATAC-Seq')
                        )
     STATUS_CHOICES = (
                       ('Ready', 'Ready'),

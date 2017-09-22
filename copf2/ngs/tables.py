@@ -49,11 +49,23 @@ class SampleTable(tables.Table):
     class Meta:
         model = Sample
         attrs = {"class": "paleblue"}
-        exclude = ('review','changed')
+        exclude = ('review','changed','preparation_type')
         sequence = ('curated','sample_id','barcode','flow_name')
     flow_name = tables.Column(accessor="flowlane", verbose_name="Flowlane")
     raw_file = tables.Column(accessor="related_sample",verbose_name="Raw files")
     scientist= tables.LinkColumn('samples', text='A(scientist)')
+    seqtype = tables.Column(accessor="flowlane", verbose_name="Seq.Type")
+    
+    def render_seqtype(self, value, table):
+        if value is not None:
+            seqList = list(value.all())
+            tot = ""
+            for s in seqList:
+                pair = s.read_type + str(s.read_length) + ','
+                tot += pair
+            return tot[:-1]
+        return '-'
+    
     
     def render_curated(self, value):
         if value is True:
