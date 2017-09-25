@@ -66,14 +66,13 @@ def ExtractAndAdd_flowlane(sample):
             cc = myd['unsplit_checks'] # md5 sum for multiplexed bam file
             if not len(cc)==1:
                 raise Exception("wrong number of raw checks "+str(sample.sample_id)+" "+str(len(cc)))
-            print cc
-            md5 = cc[1]['md5']
-            print md5
+            for i in cc:
+                md5 = cc[i]['md5']
         else:
             md5 = None
         
         flow=add_flowlane(md5,name,readlen,readtype,results)
-        sample.flowlane.add(flowlane)
+        sample.flowlane.add(flow)
     os.remove('temp.json') # remove temp file to avoid getting samples mixed up
 
 
