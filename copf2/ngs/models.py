@@ -78,7 +78,6 @@ class Sample(models.Model):
     comments = models.CharField(max_length=200)
     descr = models.CharField(max_length=200)
     exptype = models.CharField(max_length=20,choices=EXPTYPE_CHOICES)
-    flowlane = models.ManyToManyField("Flowlane",blank=True)
     genotype = models.CharField(max_length=10)
     organism = models.CharField(max_length=20,choices=ORGANISM_CHOICES)
     preparation_kit = models.CharField(max_length=200,null=True)
@@ -87,9 +86,12 @@ class Sample(models.Model):
     status = models.CharField(max_length=20,choices=STATUS_CHOICES)
     tissue_type = models.CharField(max_length=20)
     treatment = models.CharField(max_length=200)
+    ###
     review = models.BooleanField(default=False)
     curated = models.NullBooleanField(default=None)
     changed = models.NullBooleanField(default=None)
+    ###
+    flowlane = models.ManyToManyField("Flowlane",blank=True)
     
     def got_flowlane(self):
         return len(self.flowlane_set.all())
