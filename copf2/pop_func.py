@@ -10,6 +10,11 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
 application = get_wsgi_application()
 from ngs.models import Sample, Scientist, Flowlane, Rawfile
 
+#####################################################################
+#### help functions
+#####################################################################
+
+
 def forkalleapi(what,where): ### taken from forskalle api documentation page
     passw='zBLOf2@7'
     user='Elin.Axelsson'
@@ -28,6 +33,28 @@ def read_json(jsonf):
         data = json.load(json_file)
     return data
 
+def linkFiles(path,object,type):
+    files=glob.glob(path+'/*.bam')
+    id=str(object.pk)
+    f_list=list()
+    for f in files:
+        if id in f:
+            base=os.path.basename(f)
+            if type == "raw":
+                obj, created = Rawfile.objects.get_or_create(name=base,sample=object)
+            elif type == "storage":
+                obj = Flowlane.objects.get(name=object.name)
+                #check if storage exists if so is it the same
+                if obj.storage and obj.storage != base:
+                    print flowlane.name
+                    raise Exception("More than one multiplex file!!")
+                else:
+                    obj.storage=base
+                    obj.save()
+
+
+
+
 
 
 ######################################################################
@@ -39,12 +66,20 @@ def add_scientist(name):
     obj, created = Scientist.objects.get_or_create(name = name)
     return(obj)
 
+######################################################################
+#### rawfile
+######################################################################
+
+def add_rawfile(name,sample):
+    obj, created = Rawfile.objects.get_or_create(name=name,sample=sample)
+    return(obj)
+
 
 ######################################################################
 #### flowlane
 ######################################################################
 
-### function that creates flowlane per sample, using forskalle, links flowcell to sample
+### function that creates flowlane per sample, using forskalle, links flowcell to sample.should never change!, only results
 def ExtractAndAdd_flowlane(sample):
     if not sample.status=="Ready": ## sample results not finished
         print "sample not ready"
@@ -56,65 +91,57 @@ def ExtractAndAdd_flowlane(sample):
     for i in range(0,nr): ## process each flowcell+lane at the time
         myd = data[i]
         name = myd['flowcell_id']+"_"+str(myd['num'])
-        readlen = myd['flowcell']['readlen']
+        read_length = myd['flowcell']['readlen']
         if myd['flowcell']['paired']==1:
-            readtype="PR"
+            read_type="PR"
         else:
-            readtype="SR"
+            read_type="SR"
         results = myd['is_ok']
         if results==1:
             cc = myd['unsplit_checks'] # md5 sum for multiplexed bam file
             if not len(cc)==1:
                 raise Exception("wrong number of raw checks "+str(sample.sample_id)+" "+str(len(cc)))
             for i in cc:
-                md5 = cc[i]['md5']
+                mdsum = cc[i]['md5']
         else:
-            md5 = None
+            mdsum = None
+
+
+        if Flowlane.objects.filter(pk=name).exists():
+            ex=Flowlane.objects.get(pk=name)
+            if ex.mdsum != mdsum:
+                if ex.mdsum is None:
+                    print "mdsum has been provided"
+                    ex.mdsum = mdsum
+                    ex.save()
+                else:
+                    print "wrong mdsum"
+                    print ex.mdsum
+                    print mdsum
+                    sys.exit(2)
+
+            if ex.read_length != read_length:
+                print "wrong read_length"
+                sys.exit(2)
         
-        flow=add_flowlane(md5,name,readlen,readtype,results)
-        sample.flowlane.add(flow)
+            if ex.read_type != read_type:
+                print "wrong read_type"
+                sys.exit(2)
+
+            if int(ex.results) is not int(results):
+                if int(ex.results) == 0:
+                    print "results are in"
+                    ex.results = results
+                    ex.save()
+                else:
+                    print "wrong results"
+                    print int(results)
+                    print int(ex.results)
+                    sys.exit(2)
+        obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
+        sample.flowlane.add(obj)
     os.remove('temp.json') # remove temp file to avoid getting samples mixed up
 
-
-
-
-
-### CREATE flowlane, should never change!, only results
-def add_flowlane(mdsum,name,read_length,read_type,results):
-    ## check if flowlane exists, if so is it the same
-    if Flowlane.objects.filter(pk=name).exists():
-        ex=Flowlane.objects.get(pk=name)
-        if ex.mdsum != mdsum:
-            if ex.mdsum is None:
-                print "mdsum has been provided"
-                ex.mdsum = mdsum
-                ex.save()
-            else:
-                print "wrong mdsum"
-                print ex.mdsum
-                print mdsum
-                sys.exit(2)
-    
-        if ex.read_length != read_length:
-            print "wrong read_length"
-            sys.exit(2)
-    
-        if ex.read_type != read_type:
-            print "wrong read_type"
-            sys.exit(2)
-                
-        if int(ex.results) is not int(results):
-            if int(ex.results) == 0:
-                print "results are in"
-                ex.results = results
-                ex.save()
-            else:
-                print "wrong results"
-                print int(results)
-                print int(ex.results)
-                sys.exit(2)
-    obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
-    return(obj)
 
 ### CREATE barcode strings and add to flowlane (requires that sample - flowcell link is established)
 def getBarcodeStrings(flowlane):
@@ -122,9 +149,10 @@ def getBarcodeStrings(flowlane):
     b=list()
     for i in samples:
         b.append(str(i.sample_id)+":"+Sample.objects.get(sample_id=i.sample_id).barcode)
-    bas=",".join(b)
-    flowcell.barcode=barcodestring
-    flowcell.save()
+    barcodestring=",".join(b)
+    print barcodestring
+    flowlane.barcode=barcodestring
+    flowlane.save()
 
 
 ### function to add file name of multiplex
@@ -137,6 +165,11 @@ def add_storage(flowlane,file):
     else:
         obj.storage=file
         obj.save()
+
+
+def update_all_flowlanes():
+    for flowlane in Flowlane.objects.all():
+        getBarcodeStrings(flowlane)
 
 
 
