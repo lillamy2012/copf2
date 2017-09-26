@@ -1,10 +1,11 @@
-from pop_func import forkalleapi, read_json, add_scientist, ExtractAndAdd_flowlane, getBarcodeStrings, update_all_flowlanes, create_or_update_core_sample, add_or_update_user_info_sample, linkFiles
+from pop_func import forkalleapi, read_json, add_scientist, ExtractAndAdd_flowlane, getBarcodeStrings, update_all_flowlanes, create_or_update_core_sample, add_or_update_user_info_sample, linkFiles, readin_csv, UpdateStatus, update_state
 
 import sys, getopt
 import os
 import requests
 import json
 import glob
+import pandas as pd
 
 #################################################
 
@@ -35,11 +36,12 @@ def inarg(argv):
     return type,file
 
 
-### now create initial from forskalle, time update
-#time = inarg(sys.argv[1:])
+
+
+
+### create initial from forskalle, time update
 def initial_and_time(time):
     #time = "3+months"
-    #time
     gjson="group_"+time.replace('+','_')+".json"
     print gjson
     print "samples from forskalle"
@@ -58,8 +60,17 @@ def initial_and_time(time):
     for sample in sa:
         linkFiles(de_path,sample,"raw")
 
-#def review_update()
+def review_update(type,file):
+    samples = readin_csv(file)
+    UpdateStatus(type,samples)
 
+def curated_update(type,file)
+    samples = readin_csv(file)
+    
+
+#def curated_update()
+
+#def changed_update()
 
 # rf = Rawfile.objects.all()
 
@@ -75,7 +86,7 @@ def initial_and_time(time):
 if __name__ == '__main__':
     de_path = "/Users/elin.axelsson/berger_group/lab/Raw/demultiplexed/"
     mu_path = "/Users/elin.axelsson/berger_group/lab/Raw/multiplexed/"
-    print "Starting second generation population script..."
+    #print "Starting second generation population script..."
     from django.core.wsgi import get_wsgi_application
     os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
     application = get_wsgi_application()
@@ -83,6 +94,7 @@ if __name__ == '__main__':
     type, file = inarg(sys.argv[1:])
     if type=="date":
         initial_and_time(file)
-
+    if type=="review":
+        review_update(type,file)
 
 

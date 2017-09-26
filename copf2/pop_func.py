@@ -4,6 +4,7 @@ import os
 import requests
 import json
 import glob
+import pandas as pd
 
 from django.core.wsgi import get_wsgi_application
 os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
@@ -32,6 +33,13 @@ def read_json(jsonf):
     with open(jsonf, 'r') as json_file:
         data = json.load(json_file)
     return data
+
+def readin_csv(csv):
+    df = pd.read_csv(csv,sep=";")
+    keep = df['Sample Id']
+    return keep
+
+
 
 def linkFiles(path,object,type):
     files=glob.glob(path+'/*.bam')
@@ -150,7 +158,6 @@ def getBarcodeStrings(flowlane):
     for i in samples:
         b.append(str(i.sample_id)+":"+Sample.objects.get(sample_id=i.sample_id).barcode)
     barcodestring=",".join(b)
-    print barcodestring
     flowlane.barcode=barcodestring
     flowlane.save()
 
@@ -196,13 +203,15 @@ def create_or_update_core_sample(sample_id,scientist,exptype,barcode,status,seco
         if ex.status != status:
             print "status has changed"
             ex.status = status
+            print "saving status"
+            ex.save()
         
         if ex.barcode != mbc:
             print "barcode has changed"
             ex.barcode = mbc
-        
-        print "saving"
-        ex.save()
+            print "saving barcode"
+            ex.save()
+
         return(ex)
     else:
         obj, created = Sample.objects.get_or_create(barcode=mbc, exptype=exptype, sample_id = sample_id, scientist = scientist,status=status)
@@ -228,7 +237,7 @@ def add_or_update_user_info_sample(sample_id,antibody,celltype,comments,descr,ge
 ## UPDATE State from list
 def UpdateStatus(type,data):
     for d in data:
-        up=update_state(d)
+        up=update_state(d,type)
 
 # UPDATE STATE
 def update_state(id,type):
