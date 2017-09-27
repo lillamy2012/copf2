@@ -1,4 +1,4 @@
-from pop_func import forkalleapi, read_json, add_scientist, ExtractAndAdd_flowlane, getBarcodeStrings, update_all_flowlanes, create_or_update_core_sample, add_or_update_user_info_sample, linkFiles, readin_csv, UpdateStatus, update_state
+from pop_func import forkalleapi, read_json, add_scientist, ExtractAndAdd_flowlane, getBarcodeStrings, update_all_flowlanes, create_or_update_core_sample, add_or_update_user_info_sample, linkFiles, readin_csv, UpdateStatus, update_state, check_update_sample
 
 import sys, getopt
 import os
@@ -62,13 +62,12 @@ def initial_and_time(time):
 
 def review_update(type,file):
     samples = readin_csv(file)
-    UpdateStatus(type,samples)
+    keep = samples['Sample Id']
+    UpdateStatus(type,keep)
 
-def curated_update(type,file)
-    samples = readin_csv(file)
-    
+#def curated_update(type,file):
+#    samples = readin_csv(file)
 
-#def curated_update()
 
 #def changed_update()
 
@@ -96,5 +95,14 @@ if __name__ == '__main__':
         initial_and_time(file)
     if type=="review":
         review_update(type,file)
+    if type=="curated":
+        data = readin_csv(file)
+        for i, row in data.iterrows():
+            check_update_sample(row)
+
+
+
+
+
 
 

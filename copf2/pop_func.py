@@ -61,6 +61,20 @@ def linkFiles(path,object,type):
                     obj.save()
 
 
+def readin_csv(csv):
+    df = pd.read_csv(csv,sep=";")
+    return(df)
+
+def equal(exist,new):
+    zeros= ["None","nan","NaN","na",""]
+    if exist != new:
+        if (exist in zeros and pd.isnull(new)) or (exist in zeros and new in zeros):
+            return True
+        else:
+            return False
+    else:
+        return True
+
 
 
 
@@ -273,33 +287,57 @@ def update_state(id,type):
         sys.exit(2)
 
 
-##############
-#Create and time updates
+def check_update_sample(row):
+    id=row['Sample Id']
+    update_state(id,"review")
+    cur=False
+    obj=Sample.objects.get(pk=id)
+    if not equal(obj.antibody,row['Antibody']):
+        obj.antibody=row['Antibody']
+        obj.save()
+        print "update"
+        cur=True
+    if not equal(obj.celltype,row['Celltype']):
+        obj.celltype=row['Celltype']
+        obj.save()
+        print "update"
+        cur=True
+    if not equal(obj.comments,row['Comments']):
+        obj.comments=row['Comments']
+        obj.save()
+    if not equal(obj.descr,row['Descr']):
+        obj.descr=row['Descr']
+        obj.save()
+        print "update"
+        cur=True
+    if not equal(obj.genotype,row['Genotype']):
+        obj.genotype=row['Genotype']
+        obj.save()
+        print "update"
+        cur=True
+    if not equal(obj.organism,row['Organism']):
+        obj.organism=row['Organism']
+        obj.save()
+        print "update"
+        cur=True
+    if not equal(obj.tissue_type,row['Tissue Type']):
+        obj.tissue_type=row['Tissue Type']
+        obj.save()
+        print "update"
+        cur=True
+    if not equal(obj.treatment,row['Treatment']):
+        obj.treatment=row['Treatment']
+        obj.save()
+        print "update"
+        cur=True
+    if not equal(obj.preparation_kit,row['Library prep']):
+        obj.preparation_kit=row['Library prep']
+        obj.save()
+        print "update"
+        cur=True
+    if cur:
+        update_state(id,"curated")
 
-##1, add_scientist
-##2, add_sample: create_or_update_core_sample , add_or_update_user_info_sample,
-##3, add_flowlane (from sample)
-##5, rawfiles (sample), rawfiles flowlane
-
-
-## data=read_json(json)
-## for d in data:
-## sci=add_scientist(name=d['scientist'])
-## sam=create_or_update_core_sample(sample_id=d['id'],scientist=sci,exptype=d['exptype'],barcode=d['barcode'],status=d['status'],secondary_tag=d['secondary_tag'])
-##(could also take instance instead of id) sam = add_or_update_user_info_sample(sample_id=d['id'],antibody=d['antibody'],celltype=d['celltype'],comments=d['comments'],descr=d['descr'],genotype=d['genotype'].rstrip(),organism=d['organism'],
-## preparation_kit=d['preparation_kit'],tissue_type=d['tissue_type'],treatment=d['treatment'])
-##ExtractAndAdd_flowlane(sam)
-
-##############
-# Review update
-
-##1, state
-
-##############
-# Curated update
-
-##1, update samples: add_or_update_user_info_sample
-##2, update state
 
 
 
