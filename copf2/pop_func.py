@@ -271,15 +271,6 @@ def update_state(id,type):
             print 'sample review status was not true! Check why'
             sys.exit(2)
         obj.curated=True
-        if obj.changed is None:
-            obj.change=False
-        obj.save()
-
-    elif type == 'updated':
-        if obj.curated != True:
-            print 'sample curated status was not true! Check why'
-            sys.exit(2)
-        obj.changed=True
         obj.save()
 
     else:
@@ -337,6 +328,29 @@ def check_update_sample(row):
         cur=True
     if cur:
         update_state(id,"curated")
+
+
+def clean_tissue(id):
+    incornames = pd.read_csv("correct_tissues.csv",sep=";")
+    wrong = incornames['Incorrect'].tolist()
+    obj = Sample.objects.get(pk=id)
+    #print obj.tissue_type
+    #print wrong
+    #print obj.tissue_type in wrong
+    while obj.tissue_type in wrong:
+        for i, row in incornames.iterrows():
+            if obj.tissue_type==row['Incorrect']:
+                obj.tissue_type=row['Correct']
+                obj.save()
+
+
+
+
+## in keys else
+## upper letter
+
+
+
 
 
 

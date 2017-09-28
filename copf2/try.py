@@ -1,4 +1,4 @@
-from pop_func import forkalleapi, read_json, add_scientist, ExtractAndAdd_flowlane, getBarcodeStrings, update_all_flowlanes, create_or_update_core_sample, add_or_update_user_info_sample, linkFiles, readin_csv, UpdateStatus, update_state, check_update_sample
+from pop_func import forkalleapi, read_json, add_scientist, ExtractAndAdd_flowlane, getBarcodeStrings, update_all_flowlanes, create_or_update_core_sample, add_or_update_user_info_sample, linkFiles, readin_csv, UpdateStatus, update_state, check_update_sample, clean_tissue
 
 import sys, getopt
 import os
@@ -10,9 +10,9 @@ import pandas as pd
 #################################################
 
 def inarg(argv):
-    err='status.py -rcud[review,curated,uploaded,date] <csv>/<json>'
+    err='status.py -rcudt[review,curated,uploaded,date,clean] <csv>/<json>'
     try:
-        opts, args = getopt.getopt(argv,"hr:c:u:d:",["review=","curated=","updated","date="])
+        opts, args = getopt.getopt(argv,"hr:c:u:d:t",["review=","curated=","updated","date=","clean="])
     except getopt.GetoptError:
         print err
         sys.exit(2)
@@ -20,18 +20,22 @@ def inarg(argv):
         if opt == '-h':
             print err
             sys.exit()
-        elif opt in ("-r", "--review"):
-            type = "review"
-        elif opt in ("-c", "--curated"):
-            type = "curated"
-        elif opt in ("-u","--updated"):
-            type = "updated"
-        elif opt in ("-d","--date"):
-            type = "date"
-        file = arg
-    if not 'file' in locals() or not 'type' in locals():
-        print err
-        sys.exit(2)
+        elif opt in ("-t","--clean"):
+            type = "clean"
+            file = ""
+        else:
+            if opt in ("-r", "--review"):
+                type = "review"
+            elif opt in ("-c", "--curated"):
+                type = "curated"
+            elif opt in ("-u","--updated"):
+                type = "updated"
+            elif opt in ("-d","--date"):
+                type = "date"
+            file = arg
+            if not 'file' in locals() or not 'type' in locals():
+                print err
+                sys.exit(2)
     print 'type is',type
     return type,file
 
@@ -99,8 +103,13 @@ if __name__ == '__main__':
         data = readin_csv(file)
         for i, row in data.iterrows():
             check_update_sample(row)
+    if type=="clean":
+        ids = Sample.objects.values_list('pk',flat=True).distinct()
+        for i in ids:
+            #print i
+            clean_tissue(i)
 
-
+### left to do : update forskalle, remove changed, backup, interface
 
 
 

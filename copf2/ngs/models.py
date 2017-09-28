@@ -89,7 +89,6 @@ class Sample(models.Model):
     ###
     review = models.BooleanField(default=False)
     curated = models.NullBooleanField(default=None)
-    changed = models.NullBooleanField(default=None)
     ###
     flowlane = models.ManyToManyField("Flowlane",blank=True)
     

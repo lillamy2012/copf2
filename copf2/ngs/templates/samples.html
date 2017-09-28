@@ -22,14 +22,40 @@
 				{% render_field filter.form.exptype class="form-control" %}
 			</div>
 			<div class="form-group col-md-2">
-    		{{ filter.form.scientist.label_tag }}
-				{% render_field filter.form.scientist class="form-control" %}
-    	</div>
-			<div class="form-group col-md-2">
-        {{ filter.form.status.label_tag }}
-        {% render_field filter.form.status class="form-control" %}
-    	</div>
+				{{ filter.form.genotype.label_tag }}
+				{% render_field filter.form.genotype class="form-control" %}
+			</div>
+
   	</div>
+		<div class="row">
+			<div class="form-group col-md-2">
+				{{ filter.form.scientist.label_tag}}
+				{% for choice in filter.form.scientist %}
+          <div class="form-check-input">
+        		{{ choice.tag }} {{ choice.choice_label }}
+        	</div>
+        {% endfor %}
+			</div>
+			<div class="form-group col-md-2">
+				{{ filter.form.status.label_tag }}
+				{% for choice in filter.form.status %}
+          <div class="form-check-input">
+        		{{ choice.tag }} {{ choice.choice_label }}
+        	</div>
+        {% endfor %}
+			</div>
+			<div class="form-group col-md-2">
+				{{ filter.form.tissue_type.label_tag }}
+				{% for choice in filter.form.tissue_type %}
+					<div class="form-check-input">
+						{{ choice.tag }} {{ choice.choice_label }}
+					</div>
+				{% endfor %}
+			</div>
+
+
+
+		</div>
 		<div class="row">
 			<div class="form-group col-md-1">
       	<button type="submit" class="btn btn-primary">
