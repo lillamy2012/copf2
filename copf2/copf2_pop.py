@@ -67,6 +67,7 @@ def initial_and_time(time):
 def review_update(type,file):
     samples = readin_csv(file)
     keep = samples['Sample Id']
+    print keep
     UpdateStatus(type,keep)
 
 #def curated_update(type,file):
