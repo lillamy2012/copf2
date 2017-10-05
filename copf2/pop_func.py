@@ -331,7 +331,7 @@ def check_update_sample(row):
 
 
 def clean_tissue(id):
-    incornames = pd.read_csv("correct_tissues.csv",sep=";")
+    incornames = pd.read_csv("extra_files/correct_tissues.csv",sep=";")
     wrong = incornames['Incorrect'].tolist()
     obj = Sample.objects.get(pk=id)
     if obj.tissue_type=="" or obj.tissue_type=="nan": # empty string - change to NA
