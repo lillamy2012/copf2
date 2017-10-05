@@ -37,14 +37,6 @@
         {% endfor %}
 			</div>
 			<div class="form-group col-md-2">
-				{{ filter.form.status.label_tag }}
-				{% for choice in filter.form.status %}
-          <div class="form-check-input">
-        		{{ choice.tag }} {{ choice.choice_label }}
-        	</div>
-        {% endfor %}
-			</div>
-			<div class="form-group col-md-2">
 				{{ filter.form.tissue_type.label_tag }}
 				{% for choice in filter.form.tissue_type %}
 					<div class="form-check-input">
@@ -52,6 +44,15 @@
 					</div>
 				{% endfor %}
 			</div>
+			<div class="form-group col-md-2">
+				{{ filter.form.status.label_tag }}
+				{% for choice in filter.form.status %}
+          <div class="form-check-input">
+        		{{ choice.tag }} {{ choice.choice_label }}
+        	</div>
+        {% endfor %}
+			</div>
+
 
 
 

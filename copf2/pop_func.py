@@ -334,10 +334,7 @@ def clean_tissue(id):
     incornames = pd.read_csv("correct_tissues.csv",sep=";")
     wrong = incornames['Incorrect'].tolist()
     obj = Sample.objects.get(pk=id)
-    #print obj.tissue_type
-    #print wrong
-    #print obj.tissue_type in wrong
-    if obj.tissue_type=="" or obj.tissue_type=="nan": # empty string - change to NA
+        if obj.tissue_type=="" or obj.tissue_type=="nan": # empty string - change to NA
         obj.tissue_type="NA"
         obj.save()
     else:

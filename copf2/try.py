@@ -103,6 +103,7 @@ if __name__ == '__main__':
         data = readin_csv(file)
         for i, row in data.iterrows():
             check_update_sample(row)
+            clean_tissue(row['Sample Id'])
     if type=="clean":
         ids = Sample.objects.values_list('pk',flat=True).distinct()
         for i in ids:

@@ -25,8 +25,8 @@ def scientists(request):
 def samples(request):
     queryset=Sample.objects.select_related().all()
     data = request.GET.copy()
-    if 'status' not in data:
-        data['status'] = 'Ready'
+        #if 'status' not in data:
+        #data['status'] = 'Ready'
     f = SampleFilter(data,queryset=queryset)
     table = SampleTable(f.qs)
     RequestConfig(request).configure(table)
