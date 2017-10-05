@@ -337,11 +337,15 @@ def clean_tissue(id):
     #print obj.tissue_type
     #print wrong
     #print obj.tissue_type in wrong
-    while obj.tissue_type in wrong:
-        for i, row in incornames.iterrows():
-            if obj.tissue_type==row['Incorrect']:
-                obj.tissue_type=row['Correct']
-                obj.save()
+    if obj.tissue_type=="" or obj.tissue_type=="nan": # empty string - change to NA
+        obj.tissue_type="NA"
+        obj.save()
+    else:
+        while obj.tissue_type in wrong:
+            for i, row in incornames.iterrows():
+                if obj.tissue_type==row['Incorrect']:
+                    obj.tissue_type=row['Correct']
+                    obj.save()
 
 
 
