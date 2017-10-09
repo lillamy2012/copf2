@@ -20,12 +20,17 @@ import json
 class Scientist(models.Model):
     name = models.CharField(max_length=200,primary_key=True)
 
-    def __unicode__(self):
-        return self.name
+#  def __unicode__(self):
+#       return self.name
 
 ####################
 ## Multiplex
+## class methods:
+## object methods:
+## --getBarcode
+## static methods:
 ####################
+
 class Flowlane(models.Model):
     Single_read = 'SR'
     Paired_read = 'PR'
@@ -42,13 +47,44 @@ class Flowlane(models.Model):
     storage = models.CharField(max_length=200,null=True)
 
 
-    def __unicode__(self):
-        return unicode(self.name)
+    def getBarcodeStrings(self):
+        samples = self.sample_set.all()
+        b=list()
+        for i in samples:
+            b.append(str(i.sample_id)+":"+Sample.objects.get(sample_id=i.sample_id).barcode)
+        barcodestring=",".join(b)
+        self.barcode=barcodestring
+        self.save()
+
+
+    @classmethod
+    def create_or_update(cls,mdsum,name,read_length,read_type,results):
+        print "ok"
+        obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
+        print obj
+        obj.getBarcodeStrings()
+        print obj.barcode
+        obj.save()
+        return obj
+
+#def __unicode__(self):
+#        return unicode(self.name)
 
 
 ################
 ## Sample
+## class methods:
+## --create_or_update
+## object methods:
+## --tissue_clean
+## --update_sample_forskalle
+## --get_flowlanes
+## static methods:
+## --check_barcode_type
+## --forskalleap
+## --read_json
 ################
+
 class Sample(models.Model):
     
     ORGANISM_CHOICES = (
@@ -95,22 +131,22 @@ class Sample(models.Model):
     ###
     flowlane = models.ManyToManyField("Flowlane",blank=True)
     
-    
+  
+##############
+  
     def tissue_clean(self):
         incornames = pd.read_csv("extra_files/correct_tissues.csv",sep=";")
         wrong = incornames['Incorrect'].tolist()
-    
         if self.tissue_type=="" or self.tissue_type=="nan": # empty string - change to NA
             self.tissue_type="NA"
-
         else:
             while self.tissue_type in wrong:
                 for i, row in incornames.iterrows():
                     if self.tissue_type==row['Incorrect']:
                         self.tissue_type=row['Correct']
-
         return(self)
-    
+
+###############
     
     @staticmethod
     def check_barcode_type(barcode,secondary_tag):
@@ -119,6 +155,8 @@ class Sample(models.Model):
         else:
             mbc=barcode
         return mbc
+
+###############MOVE!!
 
     @staticmethod
     def forskalleapi(what,where): ### taken from forskalle api documentation page
@@ -134,15 +172,28 @@ class Sample(models.Model):
         with open(where, "w") as outfile:
             json.dump(alljson, outfile)
 
+###############MOVE!!
+
     @staticmethod
     def read_json(jsonf):
         with open(jsonf, 'r') as json_file:
             data = json.load(json_file)
         return data
 
+###############
 
+    def update_sample_forskalle(self,scientist,exptype,mbc,status):
+        if self.exptype != exptype or self.scientist != scientist:
+                sys.exit(2)
+        if self.status != status:
+            self.status = status
+        if self.barcode != mbc:
+            self.barcode = mbc
+        self.get_flowlanes()
+        self.save()
 
-    
+###############
+
 #def update_sample_meta(self,antibody,celltype,comments,descr,genotype,organism,preparation_kit,tissue_type,treatment)
 #        self.antibody=antibody
 #        self.celltype=celltype
@@ -156,23 +207,7 @@ class Sample(models.Model):
 #        self.tissue_clean()
 #        self.save()
 
-
-    def update_sample_forskalle(self,scientist,exptype,mbc,status):
-        if self.exptype != exptype or self.scientist != scientist:
-            print "wrong exptype and/or scientist"
-            print sample_id
-            sys.exit(2)
-        
-        if self.status != status:
-            print "status has changed"
-            self.status = status
-        
-        if self.barcode != mbc:
-            print "barcode has changed"
-            self.barcode = mbc
-
-        self.get_flowlanes()
-        self.save()
+###############
     
     def get_flowlanes(self):
         if not self.status=="Ready": ## sample results not finished
@@ -199,7 +234,6 @@ class Sample(models.Model):
                     mdsum = cc[i]['md5']
             else:
                 mdsum = None
-
             if Flowlane.objects.filter(pk=name).exists():
                 ex=Flowlane.objects.get(pk=name)
                 if ex.mdsum != mdsum:
@@ -212,15 +246,12 @@ class Sample(models.Model):
                         print ex.mdsum
                         print mdsum
                         sys.exit(2)
-
                 if ex.read_length != read_length:
                     print "wrong read_length"
                     sys.exit(2)
-            
                 if ex.read_type != read_type:
                     print "wrong read_type"
                     sys.exit(2)
-    
                 if int(ex.results) is not int(results):
                     if int(ex.results) == 0:
                         print "results are in"
@@ -231,12 +262,13 @@ class Sample(models.Model):
                         print int(results)
                         print int(ex.results)
                         sys.exit(2)
-
-
-        obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
+        obj = Flowlane.create_or_update(mdsum,name,read_length,read_type,results)
+    #obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
+        print obj
         self.flowlane.add(obj)
         os.remove('temp.json') # remove temp file to avoid getting samples mixed up
 
+###############
 
     @classmethod
     def create_or_update(cls,antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_kit,sample_id,scientist,secondary_tag,status,tissue_type,treatment):
