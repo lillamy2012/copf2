@@ -5,6 +5,8 @@ import requests
 import json
 import glob
 import pandas as pd
+import numpy as np
+
 
 from django.core.wsgi import get_wsgi_application
 os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
@@ -16,7 +18,7 @@ from ngs.models import Sample, Scientist, Flowlane, Rawfile
 #####################################################################
 
 
-def forkalleapi(what,where): ### taken from forskalle api documentation page
+def forskalleapi(what,where): ### taken from forskalle api documentation page
     passw='zBLOf2@7'
     user='Elin.Axelsson'
     s = requests.Session()
@@ -33,12 +35,6 @@ def read_json(jsonf):
     with open(jsonf, 'r') as json_file:
         data = json.load(json_file)
     return data
-
-def readin_csv(csv):
-    df = pd.read_csv(csv,sep=";")
-    keep = df['Sample Id']
-    return keep
-
 
 
 def linkFiles(path,object,type):
@@ -62,7 +58,9 @@ def linkFiles(path,object,type):
 
 
 def readin_csv(csv):
-    df = pd.read_csv(csv,sep=";")
+    df = pd.read_csv(csv,sep=";") #,dtype={'Sample Id': np.int64})
+    df.dropna(how="all", inplace=True)
+    df[['Sample Id']]= df[['Sample Id']].apply(pd.to_numeric,downcast='integer')
     return(df)
 
 def equal(exist,new):
@@ -280,62 +278,34 @@ def update_state(id,type):
 
 def check_update_sample(row):
     id=row['Sample Id']
-    update_state(id,"review")
-    cur=False
+    update_state(id,"review") ## sets review to True
     obj=Sample.objects.get(pk=id)
-    if not equal(obj.antibody,row['Antibody']):
+    if equal(obj.antibody,row['Antibody']) and equal(obj.celltype,row['Celltype']) and equal(obj.comments,row['Comments']) and equal(obj.descr,row['Descr']) and equal(obj.genotype,row['Genotype']) and equal(obj.organism,row['Organism']) and equal(obj.tissue_type,row['Tissue Type']) and equal(obj.treatment,row['Treatment']) and equal(obj.preparation_kit,row['Library prep']): ## all important field are the same
+        changed=False ## to keep track
+    else:
+        zeros= ["None","nan","NaN","na",""]
         obj.antibody=row['Antibody']
-        obj.save()
-        print "update"
-        cur=True
-    if not equal(obj.celltype,row['Celltype']):
         obj.celltype=row['Celltype']
-        obj.save()
-        print "update"
-        cur=True
-    if not equal(obj.comments,row['Comments']):
         obj.comments=row['Comments']
-        obj.save()
-    if not equal(obj.descr,row['Descr']):
         obj.descr=row['Descr']
-        obj.save()
-        print "update"
-        cur=True
-    if not equal(obj.genotype,row['Genotype']):
         obj.genotype=row['Genotype']
-        obj.save()
-        print "update"
-        cur=True
-    if not equal(obj.organism,row['Organism']):
         obj.organism=row['Organism']
-        obj.save()
-        print "update"
-        cur=True
-    if not equal(obj.tissue_type,row['Tissue Type']):
         obj.tissue_type=row['Tissue Type']
-        obj.save()
-        print "update"
-        cur=True
-    if not equal(obj.treatment,row['Treatment']):
         obj.treatment=row['Treatment']
-        obj.save()
-        print "update"
-        cur=True
-    if not equal(obj.preparation_kit,row['Library prep']):
         obj.preparation_kit=row['Library prep']
+        changed=True
         obj.save()
-        print "update"
-        cur=True
-    if cur:
-        update_state(id,"curated")
-
+    update_state(id,"curated") #sample is curated even if no updates!
+    return(changed)
 
 def clean_tissue(id):
+    corrected=False
     incornames = pd.read_csv("extra_files/correct_tissues.csv",sep=";")
     wrong = incornames['Incorrect'].tolist()
     obj = Sample.objects.get(pk=id)
     if obj.tissue_type=="" or obj.tissue_type=="nan": # empty string - change to NA
         obj.tissue_type="NA"
+        corrected=True
         obj.save()
     else:
         while obj.tissue_type in wrong:
@@ -343,7 +313,8 @@ def clean_tissue(id):
                 if obj.tissue_type==row['Incorrect']:
                     obj.tissue_type=row['Correct']
                     obj.save()
-
+                    corrected=True
+    return(corrected)
 
 
 

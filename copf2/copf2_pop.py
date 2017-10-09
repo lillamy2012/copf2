@@ -6,6 +6,7 @@ import requests
 import json
 import glob
 import pandas as pd
+import numpy as np
 
 #################################################
 
@@ -65,16 +66,10 @@ def initial_and_time(time):
         linkFiles(de_path,sample,"raw")
 
 def review_update(type,file):
-    samples = readin_csv(file)
-    keep = samples['Sample Id']
-    print keep
+    df = readin_csv(file)
+    keep = df['Sample Id']
     UpdateStatus(type,keep)
 
-#def curated_update(type,file):
-#    samples = readin_csv(file)
-
-
-#def changed_update()
 
 # rf = Rawfile.objects.all()
 
@@ -96,19 +91,34 @@ if __name__ == '__main__':
     application = get_wsgi_application()
     from ngs.models import Sample, Scientist, Flowlane, Rawfile
     type, file = inarg(sys.argv[1:])
+    err=0
     if type=="date":
         initial_and_time(file)
     if type=="review":
         review_update(type,file)
     if type=="curated":
+        count=0
+        change=0
+        corrected=0
         data = readin_csv(file)
+        if not {'Antibody', 'Celltype', 'Comments', 'Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id'}.issubset(data.columns):
+            print 'file is missing column'
+            err=err+1
+            sys.exit(2)
         for i, row in data.iterrows():
-            check_update_sample(row)
-            clean_tissue(row['Sample Id'])
+            ch=check_update_sample(row)
+            count=count+1
+            change=change+ch
+            cor=clean_tissue(row['Sample Id'])
+            corrected=corrected+cor
+        print "nr items:" + str(count)
+        print "items changed:" + str(change)
+        print "tissue corrected:" + str(corrected)
+        if err > 0:
+            print "WARNING some files did not work: " +str(err)
     if type=="clean":
         ids = Sample.objects.values_list('pk',flat=True).distinct()
         for i in ids:
-            #print i
             clean_tissue(i)
 
 ### left to do : update forskalle, remove changed, backup, interface
