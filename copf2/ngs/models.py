@@ -13,7 +13,7 @@ import pandas as pd
 import requests
 import json
 import glob
-
+from copf_functions import forskalleapi, read_json
 
 ########################################################################################################################
 ########################################################################################################################
@@ -92,7 +92,6 @@ class Flowlane(models.Model):
         obj.getBarcodeStrings()
         obj.getStorage("/Users/elin.axelsson/berger_group/lab/Raw/multiplexed/")
         obj.save()
-        return obj
 
 ########################################################################################################################
 ########################################################################################################################
@@ -105,8 +104,6 @@ class Flowlane(models.Model):
 ## --get_flowlanes
 ## static methods:
 ## --check_barcode_type
-## --forskalleap
-## --read_json
 ########################################################################################################################
 ########################################################################################################################
 
@@ -181,30 +178,6 @@ class Sample(models.Model):
             mbc=barcode
         return mbc
 
-###############MOVE!!
-
-    @staticmethod
-    def forskalleapi(what,where): ### taken from forskalle api documentation page
-        passw='zBLOf2@7'
-        user='Elin.Axelsson'
-        s = requests.Session()
-        auth = { 'username': user , 'password': passw }
-        r = s.post('http://ngs.csf.ac.at/forskalle/api/login', data=auth)
-        if (r.status_code != 200):
-            raise Exception('Authentication error?')
-        r = s.get('http://ngs.csf.ac.at/forskalle/api/'+what)
-        alljson = r.json()
-        with open(where, "w") as outfile:
-            json.dump(alljson, outfile)
-
-###############MOVE!!
-
-    @staticmethod
-    def read_json(jsonf):
-        with open(jsonf, 'r') as json_file:
-            data = json.load(json_file)
-        return data
-
 ###############
 
     def update_sample_forskalle(self,scientist,exptype,mbc,status):
@@ -252,8 +225,8 @@ class Sample(models.Model):
             #print "sample not ready"
             return None
         #print "query forskalle " + str(self.sample_id)
-        Sample.forskalleapi('runs/sample/'+str(self.sample_id),'temp.json')
-        data = Sample.read_json('temp.json')
+        forskalleapi('runs/sample/'+str(self.sample_id),'temp.json')
+        data = read_json('temp.json')
         nr = len(data) ## number of flowcell+lane the sample is on
         for i in range(0,nr): ## process each flowcell+lane at the time
             myd = data[i]
@@ -272,7 +245,6 @@ class Sample(models.Model):
                     mdsum = cc[i]['md5']
             else:
                 mdsum = None
-        
             if Flowlane.objects.filter(pk=name).exists():
                 ex=Flowlane.objects.get(pk=name)
                 if ex.mdsum != mdsum:
@@ -301,8 +273,7 @@ class Sample(models.Model):
                         print int(results)
                         print int(ex.results)
                         sys.exit(2)
-            obj = Flowlane.create_or_update(mdsum,name,read_length,read_type,results,self)
-                #self.flowlane.add(obj)
+            Flowlane.create_or_update(mdsum,name,read_length,read_type,results,self)
         os.remove('temp.json') # remove temp file to avoid getting samples mixed up
 
 ###############
@@ -310,7 +281,7 @@ class Sample(models.Model):
     @classmethod
     def create_or_update(cls,antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_kit,sample_id,scientist,secondary_tag,status,tissue_type,treatment):
         mbc = Sample.check_barcode_type(barcode,secondary_tag)
-        if not Sample.objects.filter(pk=sample_id).exists(): #create new sample
+        if not Sample.objects.filter(pk=sample_id).exists(): #create and SAVE new sample
             object = cls(antibody = antibody, barcode = mbc, celltype = celltype, comments = comments, descr = descr, exptype=exptype,genotype = genotype, organism = organism, preparation_kit = preparation_kit,sample_id = sample_id, scientist = scientist,status = status,tissue_type=tissue_type,treatment=treatment)
             object.save()
         else:
