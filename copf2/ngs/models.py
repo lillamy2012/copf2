@@ -206,6 +206,7 @@ class Sample(models.Model):
         if self.barcode != mbc:
             self.barcode = mbc
         self.get_flowlanes()
+        self.getRawfiles("/Users/elin.axelsson/berger_group/lab/Raw/demultiplexed/")
         self.save()
 
 ###############
@@ -224,7 +225,17 @@ class Sample(models.Model):
 #        self.save()
 
 ###############
-    
+
+    def getRawfiles(self,path):
+        files=glob.glob(path+'/*.bam')
+        id=str(self.pk)
+        f_list=list()
+        for f in files:
+            if id in f: # match
+                base=os.path.basename(f)
+                obj, created = Rawfile.objects.get_or_create(name=base,sample=self)
+
+
     def get_flowlanes(self):
         if not self.status=="Ready": ## sample results not finished
             print "sample not ready"
@@ -293,7 +304,9 @@ class Sample(models.Model):
         else:
             new = cls(antibody = antibody, barcode = mbc, celltype = celltype, comments = comments, descr = descr, exptype=exptype,genotype = genotype, organism = organism, preparation_kit = preparation_kit,sample_id = sample_id, scientist = scientist,status = status,tissue_type=tissue_type,treatment=treatment)
             new = new.tissue_clean()
+            getRawfiles()
             new.get_flowlanes()
+            self.getRawfiles("/Users/elin.axelsson/berger_group/lab/Raw/multiplexed/")
             new.save()
 
     
