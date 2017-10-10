@@ -13,25 +13,32 @@ import pandas as pd
 import requests
 import json
 import glob
-#from pop_func import forskalleapi
 
-###############
-## Scientist
-###############
+
+########################################################################################################################
+########################################################################################################################
+## MODEL: SCIENTIST
+########################################################################################################################
+########################################################################################################################
+
 class Scientist(models.Model):
     name = models.CharField(max_length=200,primary_key=True)
+
+###############
 
     def __unicode__(self):
         return self.name
 
-####################
-## Multiplex
+########################################################################################################################
+########################################################################################################################
+## MODEL: FLOWLANE
 ## class methods:
 ## object methods:
 ## --getBarcode
 ## --getStorage
 ## static methods:
-####################
+########################################################################################################################
+########################################################################################################################
 
 class Flowlane(models.Model):
     Single_read = 'SR'
@@ -48,6 +55,7 @@ class Flowlane(models.Model):
     results = models.CharField(max_length=20)
     storage = models.CharField(max_length=200,null=True)
 
+###############
 
     def getBarcodeStrings(self):
         samples = self.sample_set.all()
@@ -58,14 +66,14 @@ class Flowlane(models.Model):
         self.barcode=barcodestring
         self.save()
 
+###############
+
     def getStorage(self,path):
         files=glob.glob(path+'/*.bam')
         id=str(self.pk)
         f_list=list()
         for f in files:
             if id in f: # match
-                if id=="CB9D0ANXX_6":
-                    print f
                 base=os.path.basename(f)
                 if self.storage and self.storage != base:
                     print flowlane.name
@@ -74,21 +82,21 @@ class Flowlane(models.Model):
                     self.storage=base
                     self.save()
 
+###############
 
     @classmethod
-    def create_or_update(cls,mdsum,name,read_length,read_type,results):
+    def create_or_update(cls,mdsum,name,read_length,read_type,results,start):
         obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
+        obj.save()
+        start.flowlane.add(obj)
         obj.getBarcodeStrings()
         obj.getStorage("/Users/elin.axelsson/berger_group/lab/Raw/multiplexed/")
         obj.save()
         return obj
 
-#def __unicode__(self):
-#        return unicode(self.name)
-
-
-################
-## Sample
+########################################################################################################################
+########################################################################################################################
+## Model: SAMPLE
 ## class methods:
 ## --create_or_update
 ## object methods:
@@ -99,7 +107,8 @@ class Flowlane(models.Model):
 ## --check_barcode_type
 ## --forskalleap
 ## --read_json
-################
+########################################################################################################################
+########################################################################################################################
 
 class Sample(models.Model):
     
@@ -206,6 +215,7 @@ class Sample(models.Model):
         if self.barcode != mbc:
             self.barcode = mbc
         self.get_flowlanes()
+        self.tissue_clean()
         self.getRawfiles("/Users/elin.axelsson/berger_group/lab/Raw/demultiplexed/")
         self.save()
 
@@ -235,12 +245,13 @@ class Sample(models.Model):
                 base=os.path.basename(f)
                 obj, created = Rawfile.objects.get_or_create(name=base,sample=self)
 
+###############
 
     def get_flowlanes(self):
         if not self.status=="Ready": ## sample results not finished
-            print "sample not ready"
+            #print "sample not ready"
             return None
-        print "query forskalle " + str(self.sample_id)
+        #print "query forskalle " + str(self.sample_id)
         Sample.forskalleapi('runs/sample/'+str(self.sample_id),'temp.json')
         data = Sample.read_json('temp.json')
         nr = len(data) ## number of flowcell+lane the sample is on
@@ -290,8 +301,8 @@ class Sample(models.Model):
                         print int(results)
                         print int(ex.results)
                         sys.exit(2)
-            obj = Flowlane.create_or_update(mdsum,name,read_length,read_type,results)
-            self.flowlane.add(obj)
+            obj = Flowlane.create_or_update(mdsum,name,read_length,read_type,results,self)
+                #self.flowlane.add(obj)
         os.remove('temp.json') # remove temp file to avoid getting samples mixed up
 
 ###############
@@ -299,17 +310,13 @@ class Sample(models.Model):
     @classmethod
     def create_or_update(cls,antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_kit,sample_id,scientist,secondary_tag,status,tissue_type,treatment):
         mbc = Sample.check_barcode_type(barcode,secondary_tag)
-        if Sample.objects.filter(pk=sample_id).exists():
-            Sample.objects.get(pk=sample_id).update_sample_forskalle(scientist,exptype,mbc,status)
+        if not Sample.objects.filter(pk=sample_id).exists(): #create new sample
+            object = cls(antibody = antibody, barcode = mbc, celltype = celltype, comments = comments, descr = descr, exptype=exptype,genotype = genotype, organism = organism, preparation_kit = preparation_kit,sample_id = sample_id, scientist = scientist,status = status,tissue_type=tissue_type,treatment=treatment)
+            object.save()
         else:
-            new = cls(antibody = antibody, barcode = mbc, celltype = celltype, comments = comments, descr = descr, exptype=exptype,genotype = genotype, organism = organism, preparation_kit = preparation_kit,sample_id = sample_id, scientist = scientist,status = status,tissue_type=tissue_type,treatment=treatment)
-            new = new.tissue_clean()
-            getRawfiles()
-            new.get_flowlanes()
-            self.getRawfiles("/Users/elin.axelsson/berger_group/lab/Raw/multiplexed/")
-            new.save()
+            object = Sample.objects.get(pk=sample_id)
+        object.update_sample_forskalle(scientist,exptype,mbc,status)
 
-    
 
     #    def got_flowlane(self):
 #    return len(self.flowlane_set.all())
@@ -323,13 +330,17 @@ class Sample(models.Model):
 #def get_entry(self,field):
 #      return self._meta.get_field(field).verbose_name#this will get the field
 
+########################################################################################################################
+########################################################################################################################
+## MODEL: RAWFILE
+########################################################################################################################
+########################################################################################################################
 
-################
-## Demultiplex
-################
 class Rawfile(models.Model):
     name = models.CharField(max_length=200,null=True)
     sample = models.ForeignKey(Sample,related_name="related_sample")
+
+###############
 
     def __unicode__(self):
         return unicode(self.name)
