@@ -42,9 +42,10 @@ def correctforskalle(sample_id,**corrections):
             sample['tissue_type'] = unicode("Seedlings 12 days old")
             print sample['tissue_type']
             print sample
-            res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(sample_id), data=json.dumps(sample))
+            res=requests.post('http://httpbin.org/post',data=json.dumps(sample))
+            #res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(sample_id), data=json.dumps(sample))
             print res.status_code
-#print res.json()['tissue_type']
+            print res.json()
 
 #print res.json()['tissue_type'] ###
 
