@@ -12,6 +12,7 @@ from django.forms import DateInput
 import pandas as pd
 import requests
 import json
+import glob
 #from pop_func import forskalleapi
 
 ###############
@@ -28,6 +29,7 @@ class Scientist(models.Model):
 ## class methods:
 ## object methods:
 ## --getBarcode
+## --getStorage
 ## static methods:
 ####################
 
@@ -56,11 +58,28 @@ class Flowlane(models.Model):
         self.barcode=barcodestring
         self.save()
 
+    def getStorage(self,path):
+        files=glob.glob(path+'/*.bam')
+        id=str(self.pk)
+        f_list=list()
+        for f in files:
+            if id in f: # match
+                if id=="CB9D0ANXX_6":
+                    print f
+                base=os.path.basename(f)
+                if self.storage and self.storage != base:
+                    print flowlane.name
+                    raise Exception("More than one multiplex file!!")
+                else:
+                    self.storage=base
+                    self.save()
+
 
     @classmethod
     def create_or_update(cls,mdsum,name,read_length,read_type,results):
         obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
         obj.getBarcodeStrings()
+        obj.getStorage("/Users/elin.axelsson/berger_group/lab/Raw/multiplexed/")
         obj.save()
         return obj
 
@@ -260,9 +279,8 @@ class Sample(models.Model):
                         print int(results)
                         print int(ex.results)
                         sys.exit(2)
-        obj = Flowlane.create_or_update(mdsum,name,read_length,read_type,results)
-    #obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
-        self.flowlane.add(obj)
+            obj = Flowlane.create_or_update(mdsum,name,read_length,read_type,results)
+            self.flowlane.add(obj)
         os.remove('temp.json') # remove temp file to avoid getting samples mixed up
 
 ###############
