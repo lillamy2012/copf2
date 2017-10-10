@@ -20,8 +20,8 @@ import json
 class Scientist(models.Model):
     name = models.CharField(max_length=200,primary_key=True)
 
-#  def __unicode__(self):
-#       return self.name
+    def __unicode__(self):
+        return self.name
 
 ####################
 ## Multiplex
@@ -59,11 +59,8 @@ class Flowlane(models.Model):
 
     @classmethod
     def create_or_update(cls,mdsum,name,read_length,read_type,results):
-        print "ok"
         obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
-        print obj
         obj.getBarcodeStrings()
-        print obj.barcode
         obj.save()
         return obj
 
@@ -234,6 +231,7 @@ class Sample(models.Model):
                     mdsum = cc[i]['md5']
             else:
                 mdsum = None
+        
             if Flowlane.objects.filter(pk=name).exists():
                 ex=Flowlane.objects.get(pk=name)
                 if ex.mdsum != mdsum:
@@ -264,7 +262,6 @@ class Sample(models.Model):
                         sys.exit(2)
         obj = Flowlane.create_or_update(mdsum,name,read_length,read_type,results)
     #obj, created = Flowlane.objects.get_or_create(mdsum=mdsum,name = name,read_length=read_length,read_type=read_type,results=results)
-        print obj
         self.flowlane.add(obj)
         os.remove('temp.json') # remove temp file to avoid getting samples mixed up
 
@@ -274,15 +271,12 @@ class Sample(models.Model):
     def create_or_update(cls,antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_kit,sample_id,scientist,secondary_tag,status,tissue_type,treatment):
         mbc = Sample.check_barcode_type(barcode,secondary_tag)
         if Sample.objects.filter(pk=sample_id).exists():
-            print "update"
             Sample.objects.get(pk=sample_id).update_sample_forskalle(scientist,exptype,mbc,status)
         else:
             new = cls(antibody = antibody, barcode = mbc, celltype = celltype, comments = comments, descr = descr, exptype=exptype,genotype = genotype, organism = organism, preparation_kit = preparation_kit,sample_id = sample_id, scientist = scientist,status = status,tissue_type=tissue_type,treatment=treatment)
-            
-            cl = new.tissue_clean()
-            cl = cl.get_flowlanes()
-            print "new"
-            cl.save()
+            new = new.tissue_clean()
+            new.get_flowlanes()
+            new.save()
 
     
 
