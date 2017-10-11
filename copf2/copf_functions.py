@@ -1,6 +1,6 @@
 import requests
 import json
-
+from requests.auth import HTTPBasicAuth
 
 
 def forskalleapi(what,where): ### taken from forskalle api documentation page
@@ -41,13 +41,12 @@ def correctforskalle(sample_id,**corrections):
             print "want: " + corrections[kw]
             sample['tissue_type'] = unicode("Seedlings 12 days old")
             print sample['tissue_type']
-            print sample
-            res=requests.post('http://httpbin.org/post',data=json.dumps(sample))
-            #res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(sample_id), data=json.dumps(sample))
+            res1=requests.post('http://httpbin.org/post',data=json.dumps(sample))
+            res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(sample_id), data=json.dumps(sample))
             print res.status_code
-            print res.json()
-
-#print res.json()['tissue_type'] ###
+            #print res1.json()
+            print res1.status_code
+            print res.json()['tissue_type'] ###
 
 #print sample
 # for kw in corrections:

@@ -194,18 +194,18 @@ class Sample(models.Model):
 
 ###############
 
-#def update_sample_meta(self,antibody,celltype,comments,descr,genotype,organism,preparation_kit,tissue_type,treatment)
-#        self.antibody=antibody
-#        self.celltype=celltype
-#        self.comments=comments
-#        self.descr=descr
-#        self.genotype=genotype
-#        self.organism=organism
-#        self.preparation_kit=preparation_kit
-#        self.tissue_type=tissue_type
-#        self.treatment=treatment
-#        self.tissue_clean()
-#        self.save()
+    def update_sample_meta(self,antibody,celltype,comments,descr,genotype,organism,preparation_kit,tissue_type,treatment):
+        self.antibody=antibody
+        self.celltype=celltype
+        self.comments=comments
+        self.descr=descr
+        self.genotype=genotype
+        self.organism=organism
+        self.preparation_kit=preparation_kit
+        self.tissue_type=tissue_type
+        self.treatment=treatment
+        self.tissue_clean()
+        self.save()
 
 ###############
 
