@@ -8,7 +8,7 @@ from django.core.wsgi import get_wsgi_application
 os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
 application = get_wsgi_application()
 from ngs.models import Sample, Scientist, Flowlane, Rawfile
-from copf_functions import forskalleapi, read_json, correctforskalle
+from copf_functions import forskalleapi, read_json, readin_csv
 
 #####################################################################
 ####
@@ -27,11 +27,11 @@ if __name__ == '__main__':
     sa = Sample.objects.all()
     print "number of samples: " + str(len(sa))
 
-#ex = Sample.objects.get(pk=46948)
+    ex = Sample.objects.get(pk=46948)
 #   print ex.descr
 #   print ex.tissue_type
-#   print ex.comments
-#   ex.updateInfo(antibody="",celltype="",comments="",descr="Seedlings 12 days old",genotype="Col jon5 KO",organism="Arabidopsis thaliana",preparation_kit=None,tissue_type="12 days old seedlings",treatment="10 min RT Mnase")
+#print ex.comments
+#    ex.updateInfo(antibody="",celltype="",comments="",descr="Seedlings 12 days old",genotype="Col jon5 KO",organism="Arabidopsis thaliana",preparation_kit=None,tissue_type="12 days old seedlings",treatment="10 min RT Mnase")
 
 #   xx = Sample.objects.get(pk=46948)
 #   print xx.comments
@@ -40,7 +40,26 @@ if __name__ == '__main__':
 
 
 ## check tissue_type retro:
-    sa = Sample.objects.all()
-    for s in sa:
-        s.tissue_clean()
-        s.save()
+#   sa = Sample.objects.all()
+#   for s in sa:
+#       s.tissue_clean()
+#       s.save()
+
+    data = readin_csv("input/DJ-14-09-17.csv")
+    if not {'Antibody', 'Celltype', 'Comments', 'Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id'}.issubset(data.columns):
+        print 'file is missing column'
+    dd = data.to_dict(orient='records')
+#print dd
+#for i, row in data.iterrows():
+    for i in dd:
+        print i['Sample Id']
+        print i['Status']
+        ex = Sample.objects.get(pk=i['Sample Id'])
+        print ex.status
+        del i['Sample Id']
+        ex.updateInfo(**i)
+#   print row
+#ex.updateInfo()
+#  ch=check_update_sample(row)
+
+

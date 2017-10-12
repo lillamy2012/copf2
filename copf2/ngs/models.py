@@ -171,7 +171,7 @@ class Sample(models.Model):
                     if self.tissue_type==row['Incorrect']:
                         self.tissue_type=row['Correct']
                          ##self.correctforskalle(tissue_type=self.tissue_type)
-        return(self)
+        return(self) ## self.save()?
 
 ###############
     
@@ -210,11 +210,16 @@ class Sample(models.Model):
 ###############
 
     def checkUpdate(self,**new_data):
+        zeros= ["None","nan","NaN","na",""]
         old = self.__dict__
+        print old
         updates = {}
         for a in new_data:
-            if old[a] != new_data[a]:
-                updates.update({a: new_data[a]})
+            print new_data[a]
+            print old[a]
+            if new_data[a] != old[a]:
+                if not (old[a] in zeros and pd.isnull(new_data[a])) and not (old[a] in zeros and new_data[a] in zeros):
+                    updates.update({a: new_data[a]})
         return updates
 
 ###############
