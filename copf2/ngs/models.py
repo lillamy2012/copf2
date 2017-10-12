@@ -102,6 +102,10 @@ class Flowlane(models.Model):
 ## --tissue_clean
 ## --update_sample_forskalle
 ## --get_flowlanes
+## --updateInfo
+## --checkUpdate
+## --correctcopf2
+## --correctforskalle
 ## static methods:
 ## --check_barcode_type
 ########################################################################################################################
@@ -148,7 +152,6 @@ class Sample(models.Model):
     tissue_type = models.CharField(max_length=20)
     treatment = models.CharField(max_length=200)
     ###
-    review = models.BooleanField(default=False)
     curated = models.NullBooleanField(default=None)
     ###
     flowlane = models.ManyToManyField("Flowlane",blank=True)
@@ -161,11 +164,13 @@ class Sample(models.Model):
         wrong = incornames['Incorrect'].tolist()
         if self.tissue_type=="" or self.tissue_type=="nan": # empty string - change to NA
             self.tissue_type="NA"
+        ##self.correctforskalle(tissue_type=self.tissue_type)
         else:
             while self.tissue_type in wrong:
                 for i, row in incornames.iterrows():
                     if self.tissue_type==row['Incorrect']:
                         self.tissue_type=row['Correct']
+                         ##self.correctforskalle(tissue_type=self.tissue_type)
         return(self)
 
 ###############
@@ -194,18 +199,49 @@ class Sample(models.Model):
 
 ###############
 
-    def update_sample_meta(self,antibody,celltype,comments,descr,genotype,organism,preparation_kit,tissue_type,treatment):
-        self.antibody=antibody
-        self.celltype=celltype
-        self.comments=comments
-        self.descr=descr
-        self.genotype=genotype
-        self.organism=organism
-        self.preparation_kit=preparation_kit
-        self.tissue_type=tissue_type
-        self.treatment=treatment
+    def updateInfo(self,**fields):
+        updates=self.checkUpdate(**fields)
+        self.curated=True
+        self.correctforskalle(**updates)
+        self.correctcopf2(**updates)
         self.tissue_clean()
         self.save()
+    
+###############
+
+    def checkUpdate(self,**new_data):
+        old = self.__dict__
+        updates = {}
+        for a in new_data:
+            if old[a] != new_data[a]:
+                updates.update({a: new_data[a]})
+        return updates
+
+###############
+
+    def correctcopf2(self,**corrections):
+        for attr, value in corrections.iteritems():
+            setattr(self, attr, value)
+        self.save()
+
+###############
+
+    def correctforskalle(self,**corrections):
+        passw='zBLOf2@7'
+        user='Elin.Axelsson'
+        s = requests.Session()
+        auth = { 'username': user , 'password': passw }
+        r = s.post('http://ngs.csf.ac.at/forskalle/api/login', data=auth)
+        if (r.status_code != 200):
+            raise Exception('Authentication error?')
+        r = s.get('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk))
+        if (r.status_code != 200):
+                raise Exception('get error')
+        sample = r.json()
+        for kw in corrections:
+            if sample[kw] != corrections[kw]:
+                sample[kw] = corrections[kw]
+        #res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
 
 ###############
 
@@ -286,20 +322,10 @@ class Sample(models.Model):
             object.save()
         else:
             object = Sample.objects.get(pk=sample_id)
+        ## if nothing has changed stop ... flowlane is problem
         object.update_sample_forskalle(scientist,exptype,mbc,status)
 
 
-    #    def got_flowlane(self):
-#    return len(self.flowlane_set.all())
-
-#   def __unicode__(self):
-#       return unicode(self.sample_id)
-
-#   def get_fields(self):
-#        return self._meta.get_all_field_names()
-
-#def get_entry(self,field):
-#      return self._meta.get_field(field).verbose_name#this will get the field
 
 ########################################################################################################################
 ########################################################################################################################

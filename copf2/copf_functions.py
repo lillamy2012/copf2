@@ -41,7 +41,7 @@ def correctforskalle(sample_id,**corrections):
             print "want: " + corrections[kw]
             sample[kw] = corrections[kw]
             print sample[kw]
-            res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(sample_id), json=sample)
-            if (res.status_code != 200):
-                raise Exception('Post error')
-            print res.json()[kw] ###
+            #res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(sample_id), json=sample)
+            #if (res.status_code != 200):
+            #    raise Exception('Post error')
+#print res.json()[kw] ###

@@ -33,12 +33,10 @@ class ScientistTable(tables.Table):
 
     def render_name(self, record):
         cur = len(Sample.objects.filter(scientist=record.name).filter(curated=True))
-        rew = len(Sample.objects.filter(scientist=record.name).filter(review=True))
+        tot = len(Sample.objects.filter(scientist=record.name))
         
-        if rew>0:
-            proc = cur/rew
-        else:
-            proc = 0
+        proc = cur/tot
+       
         url = reverse('samples')
         if proc > 0.95:
             return format_html('<span class="glyphicon glyphicon-star" style="color:gold" ></span> <a href="{}?scientist={}">{}</a>', url, record.name ,  record.name)
@@ -51,7 +49,6 @@ class SampleTable(tables.Table):
     class Meta:
         model = Sample
         attrs = {"class": "paleblue"}
-        exclude = ('review')
         sequence = ('curated','sample_id')
     flow_name = tables.Column(accessor="flowlane", verbose_name="Flowlane")
     raw_file = tables.Column(accessor="related_sample",verbose_name="Raw files")
