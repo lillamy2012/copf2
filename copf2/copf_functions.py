@@ -32,23 +32,16 @@ def correctforskalle(sample_id,**corrections):
     if (r.status_code != 200):
         raise Exception('Authentication error?')
     r = s.get('http://ngs.csf.ac.at/forskalle/api/samples/'+str(sample_id))
+    if (r.status_code != 200):
+        raise Exception('get error')
     sample = r.json()
     for kw in corrections:
-        if sample[kw] == corrections[kw]:
-            print "same"
-        else:
+        if sample[kw] != corrections[kw]:
             print "got: " + sample[kw]
             print "want: " + corrections[kw]
-            sample['tissue_type'] = unicode("Seedlings 12 days old")
-            print sample['tissue_type']
-            res1=requests.post('http://httpbin.org/post',data=json.dumps(sample))
-            res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(sample_id), data=json.dumps(sample))
-            print res.status_code
-            #print res1.json()
-            print res1.status_code
-            print res.json()['tissue_type'] ###
-
-#print sample
-# for kw in corrections:
-#       print kw
-#       print sample[kw] + " : " +
+            sample[kw] = corrections[kw]
+            print sample[kw]
+            res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(sample_id), json=sample)
+            if (res.status_code != 200):
+                raise Exception('Post error')
+            print res.json()[kw] ###
