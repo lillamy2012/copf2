@@ -48,15 +48,16 @@ if __name__ == '__main__':
     data = readin_csv("input/DJ-14-09-17.csv")
     if not {'Antibody', 'Celltype', 'Comments', 'Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id'}.issubset(data.columns):
         print 'file is missing column'
+    data.columns = map(str.lower, data.columns)
     dd = data.to_dict(orient='records')
 #print dd
 #for i, row in data.iterrows():
     for i in dd:
-        print i['Sample Id']
-        print i['Status']
-        ex = Sample.objects.get(pk=i['Sample Id'])
+        #print i['Sample Id']
+        #print i['Status']
+        ex = Sample.objects.get(pk=i['sample id'])
         print ex.status
-        del i['Sample Id']
+        del i['sample id']
         ex.updateInfo(**i)
 #   print row
 #ex.updateInfo()
