@@ -8,7 +8,7 @@ from django.core.wsgi import get_wsgi_application
 os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
 application = get_wsgi_application()
 from ngs.models import Sample, Scientist, Flowlane, Rawfile
-from copf_functions import forskalleapi, read_json, readin_csv
+from copf_functions import forskalleapi, read_json, readin_csv, updateSheet, backupDB
 
 #####################################################################
 ####
@@ -16,51 +16,30 @@ from copf_functions import forskalleapi, read_json, readin_csv
 
 if __name__ == '__main__':
     print "start"
-    time = "99+months"
-    #gjson="group_"+time.replace('+','_')+".json"
+    time = "10+months"
+    gjson="group_"+time.replace('+','_')+".json"
     #forskalleapi('samples?group=Berger&since='+time,gjson)
     #data=read_json(gjson)
-    #for d in data:
-    #   sci, created = Scientist.objects.get_or_create(name = d['scientist'])
-    #   new_sample = Sample.create_or_update(antibody=d['antibody'],barcode=d['tag'],celltype=d['celltype'],comments=d['comments'],descr=d['descr'],exptype=d['exptype'],genotype=d['genotype'],organism=d['organism'],preparation_kit=d['preparation_kit'],sample_id=d['id'],scientist=sci,secondary_tag=d['secondary_tag'],status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
-    
-    sa = Sample.objects.all()
-    print "number of samples: " + str(len(sa))
+        #for d in data:
+        #sci, created = Scientist.objects.get_or_create(name = d['scientist'])
+        #new_sample = Sample.create_or_update(antibody=d['antibody'],barcode=d['tag'],celltype=d['celltype'],comments=d['comments'],descr=d['descr'],exptype=d['exptype'],genotype=d['genotype'],organism=d['organism'],preparation_kit=d['preparation_kit'],sample_id=d['id'],scientist=sci,secondary_tag=d['secondary_tag'],status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
 
-    ex = Sample.objects.get(pk=46948)
-#   print ex.descr
-#   print ex.tissue_type
-#print ex.comments
-#    ex.updateInfo(antibody="",celltype="",comments="",descr="Seedlings 12 days old",genotype="Col jon5 KO",organism="Arabidopsis thaliana",preparation_kit=None,tissue_type="12 days old seedlings",treatment="10 min RT Mnase")
+    print "summary"
+    #sa = Sample.objects.all()
+    #print "number of samples: " + str(len(sa))
 
-#   xx = Sample.objects.get(pk=46948)
-#   print xx.comments
-#print dict([uu])
-# correctforskalle(46948,**uu)
+    print "updates"
+    #dd = updateSheet("input/DJ-14-09-17.csv")
+        #for i in dd:
+        #ex = Sample.objects.get(pk=i['sample id'])
+        #del i['sample id']
+#ex.updateInfo(**i)
 
+    backupDB(type="versions")  ## initial, versions
 
 ## check tissue_type retro:
 #   sa = Sample.objects.all()
 #   for s in sa:
 #       s.tissue_clean()
 #       s.save()
-
-    data = readin_csv("input/DJ-14-09-17.csv")
-    if not {'Antibody', 'Celltype', 'Comments', 'Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id'}.issubset(data.columns):
-        print 'file is missing column'
-    data.columns = map(str.lower, data.columns)
-    dd = data.to_dict(orient='records')
-#print dd
-#for i, row in data.iterrows():
-    for i in dd:
-        #print i['Sample Id']
-        #print i['Status']
-        ex = Sample.objects.get(pk=i['sample id'])
-        print ex.status
-        del i['sample id']
-        ex.updateInfo(**i)
-#   print row
-#ex.updateInfo()
-#  ch=check_update_sample(row)
-
 

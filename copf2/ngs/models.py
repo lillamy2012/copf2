@@ -33,9 +33,10 @@ class Scientist(models.Model):
 ########################################################################################################################
 ## MODEL: FLOWLANE
 ## class methods:
+## --create_or_update - return nothing, save self
 ## object methods:
-## --getBarcode
-## --getStorage
+## --getBarcode - return nothing, save self
+## --getStorage - return nothing, save self
 ## static methods:
 ########################################################################################################################
 ########################################################################################################################
@@ -97,17 +98,17 @@ class Flowlane(models.Model):
 ########################################################################################################################
 ## Model: SAMPLE
 ## class methods:
-## --create_or_update
+## --create_or_update - return nothing, calls functions save self
 ## object methods:
-## --tissue_clean
-## --update_sample_forskalle
-## --get_flowlanes
-## --updateInfo
-## --checkUpdate
-## --correctcopf2
-## --correctforskalle
+## --tissue_clean - return nothing, save self
+## --update_sample_forskalle - return nothing, save self
+## --get_flowlanes - return nothing, call flowlane.create_or_update which saves flowlane
+## --updateInfo - return nothing, save self
+## --checkUpdates - return updates need (dict)
+## --correctcopf2 - return nothing, save self
+## --correctforskalle - return nothing
 ## static methods:
-## --check_barcode_type
+## --check_barcode_type - return barcode
 ########################################################################################################################
 ########################################################################################################################
 
@@ -171,7 +172,7 @@ class Sample(models.Model):
                     if self.tissue_type==row['Incorrect']:
                         self.tissue_type=row['Correct']
                          ##self.correctforskalle(tissue_type=self.tissue_type)
-        return(self) ## self.save()?
+        self.save()
 
 ###############
     
@@ -202,23 +203,21 @@ class Sample(models.Model):
     def updateInfo(self,**fields):
         updates=self.checkUpdate(**fields)
         self.curated=True
-        self.correctforskalle(**updates)
-        self.correctcopf2(**updates)
-        self.tissue_clean()
-        self.save()
-    
+        if bool(updates):
+            self.correctforskalle(**updates)
+            self.correctcopf2(**updates)
+            self.tissue_clean()
+            self.save()
+
 ###############
 
     def checkUpdate(self,**new_data):
         zeros= ["None","nan","NaN","na",""]
         exclude = ["flowlane"]
         old = self.__dict__
-        print old
         updates = {}
         for a in new_data:
             if a not in exclude:
-                print new_data[a]
-                print old[a]
                 if new_data[a] != old[a]:
                     if not (old[a] in zeros and pd.isnull(new_data[a])) and not (old[a] in zeros and new_data[a] in zeros):
                         updates.update({a: new_data[a]})
@@ -260,14 +259,13 @@ class Sample(models.Model):
             if id in f: # match
                 base=os.path.basename(f)
                 obj, created = Rawfile.objects.get_or_create(name=base,sample=self)
+        self.save()
 
 ###############
 
     def get_flowlanes(self):
         if not self.status=="Ready": ## sample results not finished
-            #print "sample not ready"
             return None
-        #print "query forskalle " + str(self.sample_id)
         forskalleapi('runs/sample/'+str(self.sample_id),'temp.json')
         data = read_json('temp.json')
         nr = len(data) ## number of flowcell+lane the sample is on
