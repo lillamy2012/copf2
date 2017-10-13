@@ -162,17 +162,21 @@ class Sample(models.Model):
 ##############
   
     def tissue_clean(self):
-        incornames = pd.read_csv(my_tissue_file,sep=";")
+        print "cleaning"
+        incornames = pd.read_csv(g.my_tissue_file,sep=";")
         wrong = incornames['Incorrect'].tolist()
         if self.tissue_type=="" or self.tissue_type=="nan": # empty string - change to NA
             self.tissue_type="NA"
-        ##self.correctforskalle(tissue_type=self.tissue_type)
+            print "oe"
+            self.correctforskalle(tissue_type=self.tissue_type)
         else:
             while self.tissue_type in wrong:
                 for i, row in incornames.iterrows():
                     if self.tissue_type==row['Incorrect']:
                         self.tissue_type=row['Correct']
-                         ##self.correctforskalle(tissue_type=self.tissue_type)
+                        print "cor"
+                        self.correctforskalle(tissue_type=self.tissue_type)
+        print "save"
         self.save()
 
 ###############
@@ -196,7 +200,7 @@ class Sample(models.Model):
             self.barcode = mbc
         self.get_flowlanes()
         self.tissue_clean()
-        self.getRawfiles(my_demultiplex)
+        self.getRawfiles(g.my_demultiplex)
         self.save()
 
 ###############
@@ -248,7 +252,7 @@ class Sample(models.Model):
         for kw in corrections:
             if sample[kw] != corrections[kw]:
                 sample[kw] = corrections[kw]
-        #res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
+        res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
 
 ###############
 
