@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import shutil
 import sys, getopt
+import global_vars as g
 
 def forskalleapi(what,where): ### taken from forskalle api documentation page
     passw='zBLOf2@7'
@@ -43,7 +44,7 @@ def updateSheet(sheet):
     dd = data.to_dict(orient='records')
     return(dd)
 
-def backupDB(type,db="db.sqlite3",path="/Users/elin.axelsson/berger_group/user/elin.axelsson/copf2_backups"):
+def backupDB(type,db="db.sqlite3",path=g.my_backup):
     if type not in [ "versions","initial"]:
         print "wrong type"
         sys.exit(2)

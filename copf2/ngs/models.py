@@ -13,6 +13,7 @@ import pandas as pd
 import requests
 import json
 import glob
+import global_vars as g
 from copf_functions import forskalleapi, read_json
 
 ########################################################################################################################
@@ -91,7 +92,7 @@ class Flowlane(models.Model):
         obj.save()
         start.flowlane.add(obj)
         obj.getBarcodeStrings()
-        obj.getStorage("/Users/elin.axelsson/berger_group/lab/Raw/multiplexed/")
+        obj.getStorage(g.my_multiplex)
         obj.save()
 
 ########################################################################################################################
@@ -161,7 +162,7 @@ class Sample(models.Model):
 ##############
   
     def tissue_clean(self):
-        incornames = pd.read_csv("extra_files/correct_tissues.csv",sep=";")
+        incornames = pd.read_csv(my_tissue_file,sep=";")
         wrong = incornames['Incorrect'].tolist()
         if self.tissue_type=="" or self.tissue_type=="nan": # empty string - change to NA
             self.tissue_type="NA"
@@ -195,7 +196,7 @@ class Sample(models.Model):
             self.barcode = mbc
         self.get_flowlanes()
         self.tissue_clean()
-        self.getRawfiles("/Users/elin.axelsson/berger_group/lab/Raw/demultiplexed/")
+        self.getRawfiles(my_demultiplex)
         self.save()
 
 ###############
