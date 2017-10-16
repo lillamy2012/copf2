@@ -17,7 +17,7 @@ from copf_functions import forskalleapi, read_json, readin_csv, updateSheet, bac
 #####################################################################
 
 def inarg(argv):
-    err='copf2.py -t ["initial","fkupdate","csvupdate",cleanonly"]'
+    err='copf2.py -t ["initial","fsupdate","csvupdate",cleanonly"]'
     try:
         opts, args = getopt.getopt(argv,"ht:")
     except getopt.GetoptError:
@@ -29,7 +29,7 @@ def inarg(argv):
             sys.exit()
         elif opt == '-t':
             task = arg
-            if arg not in ("initial","fkupdate","csvupdate","cleanonly"):
+            if arg not in ("initial","fsupdate","csvupdate","cleanonly"):
                 print err
                 sys.exit(2)
             return task
@@ -47,7 +47,7 @@ if __name__ == '__main__':
         print "init"
         time = "99+months"
         forskalle=True
-    if task == "fkupdate":
+    if task == "fsupdate":
         print "regular update"
         time = "1+months"
         forskalle=True
