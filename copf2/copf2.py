@@ -56,6 +56,7 @@ if __name__ == '__main__':
     if task == "csvupdate":
         print "cleaning update"
         for f in os.listdir(g.my_updatepath):
+            print f
             try:
                 dd = updateSheet(g.my_updatepath+"/"+f)
                 for i in dd:

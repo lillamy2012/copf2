@@ -33,14 +33,16 @@ def readin_csv(csv):
     return(df)
 
 def updateSheet(sheet):
+    columnsToUse=['Antibody', 'Celltype', 'Genotype','Comments', 'Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id']
+
     data = readin_csv(sheet)
-    if not {'Antibody', 'Celltype', 'Comments', 'Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id'}.issubset(data.columns):
-        print 'file is missing column'
+    if not {'Antibody', 'Celltype', 'Comments', 'Genotype','Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id'}.issubset(data.columns):
+        missing = list(set(columnsToUse)-set(data.columns))
+        print 'file is missing column(s) ' + missing
         sys.exit(2)
     
-    columnsToUse=['Antibody', 'Celltype', 'Comments', 'Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id']
     data = data[columnsToUse]
-    data.columns = ['antibody', 'celltype', 'comments', 'descr','organism','tissue_type','treatment','preparation_kit','sample id']
+    data.columns = ['antibody', 'celltype', 'genotype','comments', 'descr','organism','tissue_type','treatment','preparation_kit','sample id']
     dd = data.to_dict(orient='records')
     return(dd)
 
