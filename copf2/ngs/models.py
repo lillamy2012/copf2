@@ -13,6 +13,8 @@ import pandas as pd
 import requests
 import json
 import glob
+import sys
+sys.path.append('extra_files')
 import global_vars as g
 from copf_functions import forskalleapi, read_json
 
@@ -162,21 +164,17 @@ class Sample(models.Model):
 ##############
   
     def tissue_clean(self):
-        print "cleaning"
         incornames = pd.read_csv(g.my_tissue_file,sep=";")
         wrong = incornames['Incorrect'].tolist()
         if self.tissue_type=="" or self.tissue_type=="nan": # empty string - change to NA
             self.tissue_type="NA"
-            print "oe"
-        #self.correctforskalle(tissue_type=self.tissue_type)
+            self.correctforskalle(tissue_type=self.tissue_type)
         else:
             while self.tissue_type in wrong:
                 for i, row in incornames.iterrows():
                     if self.tissue_type==row['Incorrect']:
                         self.tissue_type=row['Correct']
-                        print "cor"
-        # self.correctforskalle(tissue_type=self.tissue_type)
-        print "save"
+                        self.correctforskalle(tissue_type=self.tissue_type)
         self.save()
 
 ###############
@@ -193,7 +191,7 @@ class Sample(models.Model):
 
     def update_sample_forskalle(self,scientist,exptype,mbc,status):
         if self.exptype != exptype or self.scientist != scientist:
-                sys.exit(2)
+            sys.exit(2)
         if self.status != status:
             self.status = status
         if self.barcode != mbc:
@@ -252,7 +250,9 @@ class Sample(models.Model):
         for kw in corrections:
             if sample[kw] != corrections[kw]:
                 sample[kw] = corrections[kw]
-#res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
+                if self.pk == 18698:
+                    print("ok")
+                    res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
 
 ###############
 

@@ -41,52 +41,60 @@ def inarg(argv):
 
 if __name__ == '__main__':
     task =inarg(sys.argv[1:])
-    print task
+    print "running in " + task + "-mode"
     forskalle=False
+    
     if task == "initial":
-        print "init"
         time = "99+months"
         forskalle=True
+    
     if task == "fsupdate":
         print "regular update"
         time = "1+months"
         forskalle=True
+
     if task == "csvupdate":
         print "cleaning update"
-        ## for all i
-                 #dd = updateSheet("input/DJ-14-09-17.csv")
-                 #for i in dd:
-                 #ex = Sample.objects.get(pk=i['sample id'])
-                 #del i['sample id']
-                 #ex.updateInfo(**i)
-        ## move sheet to used
+        for f in os.listdir(g.my_updatepath):
+            try:
+                dd = updateSheet(g.my_updatepath+"/"+f)
+                for i in dd:
+                    ex = Sample.objects.get(pk=i['sample id'])
+                    del i['sample id']
+                    ex.updateInfo(**i)
+                os.rename(g.my_updatepath+"/"+f, g.my_old+"/"+f)
+            except:
+                print "error in file "+f
 
     if task == "cleanonly":
         print "clean only"
         sa = Sample.objects.all()
-                 #for s in sa:
-                 #s.tissue_clean()
-                 #s.save()
+        for s in sa:
+            s.tissue_clean()
+            s.save()
 
     if forskalle:
         gjson="group_"+time.replace('+','_')+".json"
-                 #forskalleapi('samples?group=Berger&since='+time,gjson)
-                 #data=read_json(gjson)
+        forskalleapi('samples?group=Berger&since='+time,gjson)
+        data=read_json(gjson)
         print "forskalle"
-                 #for d in data:
-                 #sci, created = Scientist.objects.get_or_create(name = d['scientist'])
-                 #new_sample = Sample.create_or_update(antibody=d['antibody'],barcode=d['tag'],celltype=d['celltype'],comments=d['comments'],descr=d['descr'],exptype=d['exptype'],genotype=d['genotype'],organism=d['organism'],preparation_kit=d['preparation_kit'],sample_id=d['id'],scientist=sci,secondary_tag=d['secondary_tag'],status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
+        for d in data:
+            sci, created = Scientist.objects.get_or_create(name = d['scientist'])
+            new_sample = Sample.create_or_update(antibody=d['antibody'],barcode=d['tag'],celltype=d['celltype'],comments=d['comments'],descr=d['descr'],exptype=d['exptype'],genotype=d['genotype'],organism=d['organism'],preparation_kit=d['preparation_kit'],sample_id=d['id'],scientist=sci,secondary_tag=d['secondary_tag'],status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
+        os.remove(gjson) # keep dir clean
 
     if task == "initial":
         print "initial backup"
-                 #backupDB(type="initial")
+        backupDB(type="initial")
     else:
         print "version backup"
-                 # backupDB(type="versions")
+        backupDB(type="versions")
 
     print "summary"
     sa = Sample.objects.all()
     print "number of samples: " + str(len(sa))
     fl = Flowlane.objects.all()
     print "number of flowlanes: " + str(len(fl))
+
+
 
