@@ -1,3 +1,6 @@
 Fix filtering with ready as default - no defaults…
 weird empty in genotype
-order choices 
+order choices
+forskalle correction - only one sample 
+settings for openstack
+ 
