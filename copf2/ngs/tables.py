@@ -13,8 +13,9 @@ class ScientistTable(tables.Table):
         attrs = {"class": "paleblue"}
 
     name= tables.LinkColumn('samples', text='A(name)')
-    num = tables.Column(empty_values=(),verbose_name="# Samples",orderable=False)
-    curated= tables.Column(empty_values=(),verbose_name="# Curated",orderable=False)
+    num = tables.Column(empty_values=(),verbose_name="# Tot. samples",orderable=False)
+    ready = tables.Column(empty_values=(),verbose_name="# Ready samples",orderable=False)
+    curated= tables.Column(empty_values=(),verbose_name="# Curated samples",orderable=False)
     
     def render_curated(self,record):
         cur = len(Sample.objects.filter(scientist=record.name).filter(curated=True))
@@ -30,13 +31,21 @@ class ScientistTable(tables.Table):
     def render_num(self,record):
         nrsamples = len(Sample.objects.filter(scientist=record.name))
         return nrsamples
+    
+    def render_ready(self,record):
+        nrsamples = len(Sample.objects.filter(scientist=record.name).filter(status="Ready"))
+        return nrsamples
+
 
     def render_name(self, record):
         cur = len(Sample.objects.filter(scientist=record.name).filter(curated=True))
-        tot = len(Sample.objects.filter(scientist=record.name))
+        tot = len(Sample.objects.filter(scientist=record.name).filter(status="Ready"))
         
-        proc = cur/tot
-       
+        if tot > 0:
+            proc = cur/tot
+        else:
+            proc = 0
+        
         url = reverse('samples')
         if proc > 0.95:
             return format_html('<span class="glyphicon glyphicon-star" style="color:gold" ></span> <a href="{}?scientist={}">{}</a>', url, record.name ,  record.name)
