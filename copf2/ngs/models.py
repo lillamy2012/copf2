@@ -168,14 +168,14 @@ class Sample(models.Model):
         if self.tissue_type=="" or self.tissue_type=="nan": # empty string - change to NA
             self.tissue_type="NA"
             print "oe"
-            self.correctforskalle(tissue_type=self.tissue_type)
+        #self.correctforskalle(tissue_type=self.tissue_type)
         else:
             while self.tissue_type in wrong:
                 for i, row in incornames.iterrows():
                     if self.tissue_type==row['Incorrect']:
                         self.tissue_type=row['Correct']
                         print "cor"
-                        self.correctforskalle(tissue_type=self.tissue_type)
+        # self.correctforskalle(tissue_type=self.tissue_type)
         print "save"
         self.save()
 
@@ -252,7 +252,7 @@ class Sample(models.Model):
         for kw in corrections:
             if sample[kw] != corrections[kw]:
                 sample[kw] = corrections[kw]
-        res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
+#res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
 
 ###############
 
