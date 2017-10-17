@@ -250,10 +250,8 @@ class Sample(models.Model):
         for kw in corrections:
             if sample[kw] != corrections[kw]:
                 sample[kw] = corrections[kw]
-        if self.pk == 18698:
-            print "ok"
-            res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
-
+       	res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
+	print corrections
 ###############
 
     def getRawfiles(self,path):
