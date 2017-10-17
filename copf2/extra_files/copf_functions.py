@@ -72,5 +72,5 @@ def backupDB(type,db="db.sqlite3",path=g.my_backup):
         else:
             shutil.copy2("db.sqlite3",fullpath+"/db.sqlite3")
             shutil.copy2("db.sqlite3",path+"/versions/db.sqlite3")
-            os.symlink(path+"/versions/db.sqlite3",path+"/current/db.sqlite3")
+##            os.symlink(path+"/versions/db.sqlite3",path+"/current/db.sqlite3")
 
