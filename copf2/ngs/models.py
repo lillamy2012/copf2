@@ -14,7 +14,7 @@ import requests
 import json
 import glob
 import sys
-sys.path.append('extra_files')
+sys.path.append('/home/debian/copf2/copf2/extra_files')
 import global_vars as g
 from copf_functions import forskalleapi, read_json
 
