@@ -28,13 +28,12 @@ def read_json(jsonf):
 
 def readin_csv(csv):
     df = pd.read_csv(csv,sep=";") #,dtype={'Sample Id': np.int64})
-    df.dropna(how="all", inplace=True)
+    #df.dropna(how="all", inplace=True)
     df[['Sample Id']]= df[['Sample Id']].apply(pd.to_numeric,downcast='integer')
     return(df)
 
 def updateSheet(sheet):
     columnsToUse=['Antibody', 'Celltype', 'Genotype','Comments', 'Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id']
-
     data = readin_csv(sheet)
     if not {'Antibody', 'Celltype', 'Comments', 'Genotype','Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id'}.issubset(data.columns):
         missing = list(set(columnsToUse)-set(data.columns))
@@ -72,5 +71,5 @@ def backupDB(type,db="db.sqlite3",path=g.my_backup):
         else:
             shutil.copy2("db.sqlite3",fullpath+"/db.sqlite3")
             shutil.copy2("db.sqlite3",path+"/versions/db.sqlite3")
-            os.symlink(path+"/versions/db.sqlite3",path+"/current/db.sqlite3")
+##            os.symlink(path+"/versions/db.sqlite3",path+"/current/db.sqlite3")
 

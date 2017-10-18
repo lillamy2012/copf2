@@ -58,11 +58,14 @@ if __name__ == '__main__':
         for f in os.listdir(g.my_updatepath):
             print f
             try:
+		print "1"
                 dd = updateSheet(g.my_updatepath+"/"+f)
+		print "2"
                 for i in dd:
                     ex = Sample.objects.get(pk=i['sample id'])
                     del i['sample id']
                     ex.updateInfo(**i)
+		print "3"
                 os.rename(g.my_updatepath+"/"+f, g.my_old+"/"+f)
             except:
                 print "error in file "+f
