@@ -1,3 +1,4 @@
 *.pyc
 copf2/ngs/migrations*
 *DS_Store
+*secret.py

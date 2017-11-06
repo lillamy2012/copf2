@@ -17,6 +17,7 @@ import sys
 sys.path.append('extra_files')
 import global_vars as g
 from copf_functions import forskalleapi, read_json
+import secret as s
 
 ########################################################################################################################
 ########################################################################################################################
@@ -236,7 +237,7 @@ class Sample(models.Model):
 ###############
 
     def correctforskalle(self,**corrections):
-        passw='zBLOf2@7'
+        passw=s.passw
         user='Elin.Axelsson'
         s = requests.Session()
         auth = { 'username': user , 'password': passw }
