@@ -14,10 +14,10 @@ import requests
 import json
 import glob
 import sys
-sys.path.append('extra_files')
+sys.path.append('/home/debian/copf2/copf2/extra_files')
 import global_vars as g
-from copf_functions import forskalleapi, read_json
 import secret as ts
+from copf_functions import forskalleapi, read_json
 
 ########################################################################################################################
 ########################################################################################################################
@@ -248,13 +248,11 @@ class Sample(models.Model):
         if (r.status_code != 200):
                 raise Exception('get error')
         sample = r.json()
-	for kw in corrections:
+        for kw in corrections:
             if sample[kw] != corrections[kw]:
                 sample[kw] = corrections[kw]
-        res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
-        print corrections
-
-
+       	res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
+	print corrections
 ###############
 
     def getRawfiles(self,path):
