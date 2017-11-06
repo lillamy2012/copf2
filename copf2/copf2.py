@@ -2,7 +2,7 @@ import sys, getopt
 import os
 import requests
 import json
-sys.path.append('extra_files')
+sys.path.append('/home/debian/copf2/copf2/extra_files')
 
 import global_vars as g
 import secret as ts
