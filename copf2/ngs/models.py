@@ -248,12 +248,12 @@ class Sample(models.Model):
         if (r.status_code != 200):
                 raise Exception('get error')
         sample = r.json()
-        for kw in corrections:
+	for kw in corrections:
             if sample[kw] != corrections[kw]:
                 sample[kw] = corrections[kw]
-        if self.pk == 18698:
-            print "ok"
-            res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
+        res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
+        print corrections
+
 
 ###############
 
