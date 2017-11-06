@@ -5,6 +5,7 @@ import json
 sys.path.append('extra_files')
 
 import global_vars as g
+import secret as ts
 
 from django.core.wsgi import get_wsgi_application
 os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'

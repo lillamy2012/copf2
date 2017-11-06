@@ -6,10 +6,10 @@ import numpy as np
 import shutil
 import sys, getopt
 import global_vars as g
-import secret as s
+import secret as ts
 
 def forskalleapi(what,where): ### taken from forskalle api documentation page
-    passw=s.passw
+    passw=ts.passw
     user='Elin.Axelsson'
     s = requests.Session()
     auth = { 'username': user , 'password': passw }
