@@ -8,6 +8,26 @@ import sys, getopt
 import global_vars as g
 import secret as ts
 
+def fsk3api(what,where):
+    base = 'https://ngs.vbcf.ac.at/forskalle3'
+    s = requests.Session()
+    passw=ts.passw
+    user='Elin.Axelsson'
+    auth = { 'username': user , 'password': passw }
+    r = s.post(base+'/api/login', data=json.dumps(auth))
+    if (r.status_code != 200):
+    # Forskalle3 error structure
+        err = r.json()['errors'][0]
+        print err['code']
+        print err['title']+': '+err['detail']
+        raise Exception('Authentication error?')
+    r = s.get(base+'/api/'+what)
+    alljson = r.json()
+    with open(where, "w") as outfile:
+        json.dump(alljson, outfile)
+
+
+
 def forskalleapi(what,where): ### taken from forskalle api documentation page
     passw=ts.passw
     user='Elin.Axelsson'
