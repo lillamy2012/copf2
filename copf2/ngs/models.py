@@ -17,7 +17,7 @@ import sys
 sys.path.append('/home/debian/copf2/copf2/extra_files')
 import global_vars as g
 import secret as ts
-from copf_functions import forskalleapi, read_json
+from copf_functions import fsk3api, read_json
 
 ########################################################################################################################
 ########################################################################################################################
@@ -237,21 +237,21 @@ class Sample(models.Model):
 ###############
 
     def correctforskalle(self,**corrections):
-        passw=ts.passw
-        user='Elin.Axelsson'
-        s = requests.Session()
-        auth = { 'username': user , 'password': passw }
-        r = s.post('http://ngs.csf.ac.at/forskalle/api/login', data=auth)
-        if (r.status_code != 200):
-            raise Exception('Authentication error?')
-        r = s.get('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk))
-        if (r.status_code != 200):
-                raise Exception('get error')
-        sample = r.json()
-        for kw in corrections:
-            if sample[kw] != corrections[kw]:
-                sample[kw] = corrections[kw]
-       	res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
+        #passw=ts.passw
+        #user='Elin.Axelsson'
+        #s = requests.Session()
+        #auth = { 'username': user , 'password': passw }
+        #r = s.post('http://ngs.csf.ac.at/forskalle/api/login', data=auth)
+        #if (r.status_code != 200):
+        #    raise Exception('Authentication error?')
+        #r = s.get('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk))
+        #if (r.status_code != 200):
+        #        raise Exception('get error')
+        #sample = r.json()
+        #for kw in corrections:
+        #    if sample[kw] != corrections[kw]:
+        #        sample[kw] = corrections[kw]
+        #res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
 	print corrections
 ###############
 

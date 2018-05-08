@@ -7,8 +7,15 @@ import shutil
 import sys, getopt
 import global_vars as g
 import secret as ts
+import datetime
 
-def fsk3api(what,where):
+def getAPIstring(address="samples/group?filter.group=Berger&filter.received_after",days=0):
+    f_date = datetime.date.today() + datetime.timedelta(-days)
+    string = address+"="+str(f_date)
+    return string
+
+
+def fsk3api(what,where): ### taken from forskalle3 api documentation page
     base = 'https://ngs.vbcf.ac.at/forskalle3'
     s = requests.Session()
     passw=ts.passw
@@ -22,21 +29,6 @@ def fsk3api(what,where):
         print err['title']+': '+err['detail']
         raise Exception('Authentication error?')
     r = s.get(base+'/api/'+what)
-    alljson = r.json()
-    with open(where, "w") as outfile:
-        json.dump(alljson, outfile)
-
-
-
-def forskalleapi(what,where): ### taken from forskalle api documentation page
-    passw=ts.passw
-    user='Elin.Axelsson'
-    s = requests.Session()
-    auth = { 'username': user , 'password': passw }
-    r = s.post('http://ngs.csf.ac.at/forskalle/api/login', data=auth)
-    if (r.status_code != 200):
-        raise Exception('Authentication error?')
-    r = s.get('http://ngs.csf.ac.at/forskalle/api/'+what)
     alljson = r.json()
     with open(where, "w") as outfile:
         json.dump(alljson, outfile)

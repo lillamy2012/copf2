@@ -44,14 +44,14 @@ if __name__ == '__main__':
     task =inarg(sys.argv[1:])
     print "running in " + task + "-mode"
     forskalle=False
+    time=-1
     
     if task == "initial":
-        time = "99+months"
         forskalle=True
     
     if task == "fsupdate":
         print "regular update"
-        time = "1+months"
+        time = 30
         forskalle=True
 
     if task == "csvupdate":
@@ -79,8 +79,12 @@ if __name__ == '__main__':
             s.save()
 
     if forskalle:
-        gjson="group_"+time.replace('+','_')+".json"
-        forskalleapi('samples?group=Berger&since='+time,gjson)
+        gjson="group.json"
+        if time < 0:
+            fsk3api('samples/group?filter.group=Berger',gjson)
+        else:
+            url = getAPIstring(days=time)
+            fsk3api(url,gjson)
         data=read_json(gjson)
         print "forskalle"
         for d in data:
