@@ -93,8 +93,7 @@ if __name__ == '__main__':
             sci, created = Scientist.objects.get_or_create(name = d['scientist'])
 #print d['tag'], d['secondary_tag']
 #print d['description']
-            print d['preparation_kit']
-#new_sample = Sample.create_or_update(antibody=d['antibody'],barcode=d['adaptor_tag'],celltype=d['celltype'],comments=d['comments'],descr=d['description'],exptype=d['exptype'],genotype=d['genotype'],organism=d['organism'],preparation_kit=d['preparation_kit'],sample_id=d['id'],scientist=sci,secondary_tag=d['adaptor_secondary_tag'],status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
+            new_sample = Sample.create_or_update(antibody=d['antibody'],barcode=d['adaptor_tag'],celltype=d['celltype'],comments=d['comments'],descr=d['description'],exptype=d['exptype'],genotype=d['genotype'],organism=d['organism'],preparation_kit=d['preparation_kit'],sample_id=d['id'],scientist=sci,secondary_tag=d['adaptor_secondary_tag'],status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
 #os.remove(gjson) # keep dir clean
 
     if task == "initial":

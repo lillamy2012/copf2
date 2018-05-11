@@ -145,8 +145,8 @@ class Sample(models.Model):
                        
     antibody = models.CharField(max_length=20)
     barcode = models.CharField(max_length=20,null=True)
-    celltype = models.CharField(max_length=20)
-    comments = models.CharField(max_length=200)
+    celltype = models.CharField(max_length=20,null=True)
+    comments = models.CharField(max_length=200,null=True)
     descr = models.CharField(max_length=200)
     exptype = models.CharField(max_length=20,choices=EXPTYPE_CHOICES)
     genotype = models.CharField(max_length=10)
