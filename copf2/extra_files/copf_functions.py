@@ -39,50 +39,50 @@ def read_json(jsonf):
         data = json.load(json_file)
     return data
 
-def readin_csv(csv):
-    df = pd.read_csv(csv,sep=";") #,dtype={'Sample Id': np.int64})
-    #df.dropna(how="all", inplace=True)
-    df[['Sample Id']]= df[['Sample Id']].apply(pd.to_numeric,downcast='integer')
-    return(df)
+#def readin_csv(csv):
+    #df = pd.read_csv(csv,sep=";") #,dtype={'Sample Id': np.int64})
+    ##df.dropna(how="all", inplace=True)
+    #df[['Sample Id']]= df[['Sample Id']].apply(pd.to_numeric,downcast='integer')
+    #return(df)
 
-def updateSheet(sheet):
-    columnsToUse=['Antibody', 'Celltype', 'Genotype','Comments', 'Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id']
-    data = readin_csv(sheet)
-    if not {'Antibody', 'Celltype', 'Comments', 'Genotype','Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id'}.issubset(data.columns):
-        missing = list(set(columnsToUse)-set(data.columns))
-        print 'file is missing column(s) ' + missing
-        sys.exit(2)
+#def updateSheet(sheet):
+    #columnsToUse=['Antibody', 'Celltype', 'Genotype','Comments', 'Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id']
+    #data = readin_csv(sheet)
+    #if not {'Antibody', 'Celltype', 'Comments', 'Genotype','Descr','Organism','Tissue Type','Treatment','Library prep','Sample Id'}.issubset(data.columns):
+    # missing = list(set(columnsToUse)-set(data.columns))
+    #   print 'file is missing column(s) ' + missing
+    #   sys.exit(2)
     
-    data = data[columnsToUse]
-    data.columns = ['antibody', 'celltype', 'genotype','comments', 'descr','organism','tissue_type','treatment','preparation_kit','sample id']
-    dd = data.to_dict(orient='records')
-    return(dd)
+    #data = data[columnsToUse]
+    #data.columns = ['antibody', 'celltype', 'genotype','comments', 'descr','organism','tissue_type','treatment','preparation_kit','sample id']
+    #dd = data.to_dict(orient='records')
+#return(dd)
 
-def backupDB(type,db="db.sqlite3",path=g.my_backup):
-    if type not in [ "versions","initial"]:
-        print "wrong type"
-        sys.exit(2)
-    fullpath = path+"/"+type
-    vs=os.listdir(fullpath)
-    if type == "versions":
-        name=db+"_"
-        fname = [s for s in vs if name in s] #
-        num = [ int(s.split('_')[1]) for s in fname ]
-        Z = [ x for _,x in sorted(zip(num,fname))]
-        Y = sorted(num)
-        for i in range(len(Y)-1,-1,-1): # rename all existing except current
-            shutil.copy2(fullpath+"/"+Z[i],fullpath+"/"+name+str(Y[i]+1))
-            print fullpath+"/"+Z[i]+","+fullpath+"/"+name+str(Y[i]+1)
-
-        shutil.copy2(fullpath+"/"+db,fullpath+"/"+db+"_1") # rename current
-        print fullpath+"/"+db+","+fullpath+"/"+db+"_1"
-        shutil.copy2("db.sqlite3",fullpath+"/db.sqlite3") # copy new current
+#def backupDB(type,db="db.sqlite3",path=g.my_backup):
+    #if type not in [ "versions","initial"]:
+    #    print "wrong type"
+    #    sys.exit(2)
+    #fullpath = path+"/"+type
+    #vs=os.listdir(fullpath)
+    #if type == "versions":
+    #    name=db+"_"
+    #   fname = [s for s in vs if name in s] #
+    #   num = [ int(s.split('_')[1]) for s in fname ]
+    #   Z = [ x for _,x in sorted(zip(num,fname))]
+    #   Y = sorted(num)
+    #   for i in range(len(Y)-1,-1,-1): # rename all existing except current
+    #       shutil.copy2(fullpath+"/"+Z[i],fullpath+"/"+name+str(Y[i]+1))
+    #       print fullpath+"/"+Z[i]+","+fullpath+"/"+name+str(Y[i]+1)
+    #
+    #   shutil.copy2(fullpath+"/"+db,fullpath+"/"+db+"_1") # rename current
+    #   print fullpath+"/"+db+","+fullpath+"/"+db+"_1"
+    #   shutil.copy2("db.sqlite3",fullpath+"/db.sqlite3") # copy new current
    
-    if type == "initial":
-        if len(vs)>0 or len(os.listdir(path+"/versions")):
-            print "folders are not empty, please remove old files berfore initiating"
-        else:
-            shutil.copy2("db.sqlite3",fullpath+"/db.sqlite3")
-            shutil.copy2("db.sqlite3",path+"/versions/db.sqlite3")
+   #if type == "initial":
+   #    if len(vs)>0 or len(os.listdir(path+"/versions")):
+   #        print "folders are not empty, please remove old files berfore initiating"
+   #    else:
+   #        shutil.copy2("db.sqlite3",fullpath+"/db.sqlite3")
+#        shutil.copy2("db.sqlite3",path+"/versions/db.sqlite3")
 ##            os.symlink(path+"/versions/db.sqlite3",path+"/current/db.sqlite3")
 

@@ -2,7 +2,8 @@ import sys, getopt
 import os
 import requests
 import json
-sys.path.append('/home/debian/copf2/copf2/extra_files')
+#sys.path.append('/home/debian/copf2/copf2/extra_files')
+sys.path.append('extra_files')
 
 import global_vars as g
 import secret as ts
@@ -11,7 +12,7 @@ from django.core.wsgi import get_wsgi_application
 os.environ['DJANGO_SETTINGS_MODULE'] = 'copf2.settings'
 application = get_wsgi_application()
 from ngs.models import Sample, Scientist, Flowlane, Rawfile
-from copf_functions import forskalleapi, read_json, readin_csv, updateSheet, backupDB
+from copf_functions import fsk3api, read_json, getAPIstring  # readin_csv, updateSheet, backupDB
 
 #####################################################################
 #### read in arg
@@ -48,6 +49,7 @@ if __name__ == '__main__':
     
     if task == "initial":
         forskalle=True
+        time = 30 ## build tmp
     
     if task == "fsupdate":
         print "regular update"
@@ -89,21 +91,24 @@ if __name__ == '__main__':
         print "forskalle"
         for d in data:
             sci, created = Scientist.objects.get_or_create(name = d['scientist'])
-            new_sample = Sample.create_or_update(antibody=d['antibody'],barcode=d['tag'],celltype=d['celltype'],comments=d['comments'],descr=d['descr'],exptype=d['exptype'],genotype=d['genotype'],organism=d['organism'],preparation_kit=d['preparation_kit'],sample_id=d['id'],scientist=sci,secondary_tag=d['secondary_tag'],status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
-        os.remove(gjson) # keep dir clean
+#print d['tag'], d['secondary_tag']
+#print d['description']
+            print d['preparation_kit']
+#new_sample = Sample.create_or_update(antibody=d['antibody'],barcode=d['adaptor_tag'],celltype=d['celltype'],comments=d['comments'],descr=d['description'],exptype=d['exptype'],genotype=d['genotype'],organism=d['organism'],preparation_kit=d['preparation_kit'],sample_id=d['id'],scientist=sci,secondary_tag=d['adaptor_secondary_tag'],status=d['status'],tissue_type=d['tissue_type'],treatment=d['treatment'])
+#os.remove(gjson) # keep dir clean
 
     if task == "initial":
         print "initial backup"
-        backupDB(type="initial")
+#    backupDB(type="initial")
     else:
         print "version backup"
         backupDB(type="versions")
 
     print "summary"
-    sa = Sample.objects.all()
-    print "number of samples: " + str(len(sa))
-    fl = Flowlane.objects.all()
-    print "number of flowlanes: " + str(len(fl))
+#sa = Sample.objects.all()
+#print "number of samples: " + str(len(sa))
+#   fl = Flowlane.objects.all()
+#   print "number of flowlanes: " + str(len(fl))
 
 
 

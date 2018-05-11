@@ -1,0 +1,11 @@
+django 
+django-tables2
+requests
+pip install django-bootstrap-toolkit
+ pip install jango-widget-tweaks
+Pandas
+django_filters
+pip install djangorestframework-filters
+pip install tablib
+
+Sqlite

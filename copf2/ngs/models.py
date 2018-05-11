@@ -14,7 +14,8 @@ import requests
 import json
 import glob
 import sys
-sys.path.append('/home/debian/copf2/copf2/extra_files')
+#sys.path.append('/home/debian/copf2/copf2/extra_files')
+sys.path.append('extra_files')
 import global_vars as g
 import secret as ts
 from copf_functions import fsk3api, read_json
@@ -165,17 +166,17 @@ class Sample(models.Model):
 ##############
   
     def tissue_clean(self):
-        incornames = pd.read_csv(g.my_tissue_file,sep=";")
-        wrong = incornames['Incorrect'].tolist()
-        if self.tissue_type=="" or self.tissue_type=="nan": # empty string - change to NA
-            self.tissue_type="NA"
-            self.correctforskalle(tissue_type=self.tissue_type)
-        else:
-            while self.tissue_type in wrong:
-                for i, row in incornames.iterrows():
-                    if self.tissue_type==row['Incorrect']:
-                        self.tissue_type=row['Correct']
-                        self.correctforskalle(tissue_type=self.tissue_type)
+        #    incornames = pd.read_csv(g.my_tissue_file,sep=";")
+        #wrong = incornames['Incorrect'].tolist()
+        #if self.tissue_type=="" or self.tissue_type=="nan": # empty string - change to NA
+        #    self.tissue_type="NA"
+        #    self.correctforskalle(tissue_type=self.tissue_type)
+        #else:
+        #    while self.tissue_type in wrong:
+        #       for i, row in incornames.iterrows():
+        #            if self.tissue_type==row['Incorrect']:
+        #                self.tissue_type=row['Correct']
+        #                self.correctforskalle(tissue_type=self.tissue_type)
         self.save()
 
 ###############
@@ -191,47 +192,48 @@ class Sample(models.Model):
 ###############
 
     def update_sample_forskalle(self,scientist,exptype,mbc,status):
-        if self.exptype != exptype or self.scientist != scientist:
-            sys.exit(2)
-        if self.status != status:
-            self.status = status
-        if self.barcode != mbc:
-            self.barcode = mbc
-        self.get_flowlanes()
-        self.tissue_clean()
-        self.getRawfiles(g.my_demultiplex)
+        # if self.exptype != exptype or self.scientist != scientist:
+        #    sys.exit(2)
+        #if self.status != status:
+        #    self.status = status
+        #if self.barcode != mbc:
+        #    self.barcode = mbc
+        #self.get_flowlanes()
+        #self.tissue_clean()
+        #self.getRawfiles(g.my_demultiplex)
         self.save()
 
 ###############
 
     def updateInfo(self,**fields):
-        updates=self.checkUpdate(**fields)
-        self.curated=True
-        if bool(updates):
-            self.correctforskalle(**updates)
-            self.correctcopf2(**updates)
-            self.tissue_clean()
-            self.save()
+        #  updates=self.checkUpdate(**fields)
+        #self.curated=True
+        #if bool(updates):
+        #    self.correctforskalle(**updates)
+        #    self.correctcopf2(**updates)
+        #    self.tissue_clean()
+        self.save()
 
 ###############
 
     def checkUpdate(self,**new_data):
-        zeros= ["None","nan","NaN","na",""]
-        exclude = ["flowlane"]
-        old = self.__dict__
-        updates = {}
-        for a in new_data:
-            if a not in exclude:
-                if new_data[a] != old[a]:
-                    if not (old[a] in zeros and pd.isnull(new_data[a])) and not (old[a] in zeros and new_data[a] in zeros):
-                        updates.update({a: new_data[a]})
-        return updates
+        #zeros= ["None","nan","NaN","na",""]
+        #exclude = ["flowlane"]
+        #old = self.__dict__
+        #updates = {}
+        #for a in new_data:
+        #   if a not in exclude:
+        #       if new_data[a] != old[a]:
+        #           if not (old[a] in zeros and pd.isnull(new_data[a])) and not (old[a] in zeros and new_data[a] in zeros):
+        #               updates.update({a: new_data[a]})
+        #return updates
+        return self
 
 ###############
 
     def correctcopf2(self,**corrections):
-        for attr, value in corrections.iteritems():
-            setattr(self, attr, value)
+        #for attr, value in corrections.iteritems():
+        #    setattr(self, attr, value)
         self.save()
 
 ###############
@@ -252,74 +254,74 @@ class Sample(models.Model):
         #    if sample[kw] != corrections[kw]:
         #        sample[kw] = corrections[kw]
         #res=s.post('http://ngs.csf.ac.at/forskalle/api/samples/'+str(self.pk), json=sample)
-	print corrections
+        print corrections
 ###############
 
     def getRawfiles(self,path):
-        files=glob.glob(path+'/*.bam')
-        id=str(self.pk)
-        f_list=list()
-        for f in files:
-            if id in f: # match
-                base=os.path.basename(f)
-                obj, created = Rawfile.objects.get_or_create(name=base,sample=self)
+        #files=glob.glob(path+'/*.bam')
+        #id=str(self.pk)
+        #f_list=list()
+        #for f in files:
+        #    if id in f: # match
+        #        base=os.path.basename(f)
+        #       obj, created = Rawfile.objects.get_or_create(name=base,sample=self)
         self.save()
 
 ###############
 
     def get_flowlanes(self):
-        if not self.status=="Ready": ## sample results not finished
-            return None
-        forskalleapi('runs/sample/'+str(self.sample_id),'temp.json')
-        data = read_json('temp.json')
-        nr = len(data) ## number of flowcell+lane the sample is on
-        for i in range(0,nr): ## process each flowcell+lane at the time
-            myd = data[i]
-            name = myd['flowcell_id']+"_"+str(myd['num'])
-            read_length = myd['flowcell']['readlen']
-            if myd['flowcell']['paired']==1:
-                read_type="PR"
-            else:
-                read_type="SR"
-            results = myd['is_ok']
-            if results==1:
-                cc = myd['unsplit_checks'] # md5 sum for multiplexed bam file
-                if not len(cc)==1:
-                    raise Exception("wrong number of raw checks "+str(sample.sample_id)+" "+str(len(cc)))
-                for i in cc:
-                    mdsum = cc[i]['md5']
-            else:
-                mdsum = None
-            if Flowlane.objects.filter(pk=name).exists():
-                ex=Flowlane.objects.get(pk=name)
-                if ex.mdsum != mdsum:
-                    if ex.mdsum is None:
-                        print "mdsum has been provided"
-                        ex.mdsum = mdsum
-                        ex.save()
-                    else:
-                        print "wrong mdsum"
-                        print ex.mdsum
-                        print mdsum
-                        sys.exit(2)
-                if ex.read_length != read_length:
-                    print "wrong read_length"
-                    sys.exit(2)
-                if ex.read_type != read_type:
-                    print "wrong read_type"
-                    sys.exit(2)
-                if int(ex.results) is not int(results):
-                    if int(ex.results) == 0:
-                        print "results are in"
-                        ex.results = results
-                        ex.save()
-                    else:
-                        print "wrong results"
-                        print int(results)
-                        print int(ex.results)
-                        sys.exit(2)
-            Flowlane.create_or_update(mdsum,name,read_length,read_type,results,self)
-        os.remove('temp.json') # remove temp file to avoid getting samples mixed up
+        #  if not self.status=="Ready": ## sample results not finished
+        return None
+        #forskalleapi('runs/sample/'+str(self.sample_id),'temp.json')
+        #data = read_json('temp.json')
+        #nr = len(data) ## number of flowcell+lane the sample is on
+        #for i in range(0,nr): ## process each flowcell+lane at the time
+        #   myd = data[i]
+        #   name = myd['flowcell_id']+"_"+str(myd['num'])
+        #   read_length = myd['flowcell']['readlen']
+        #   if myd['flowcell']['paired']==1:
+        #       read_type="PR"
+        #   else:
+        #       read_type="SR"
+        #   results = myd['is_ok']
+        #   if results==1:
+        #       cc = myd['unsplit_checks'] # md5 sum for multiplexed bam file
+        #       if not len(cc)==1:
+        #           raise Exception("wrong number of raw checks "+str(sample.sample_id)+" "+str(len(cc)))
+        #       for i in cc:
+        #           mdsum = cc[i]['md5']
+        #   else:
+        #       mdsum = None
+        #   if Flowlane.objects.filter(pk=name).exists():
+        #       ex=Flowlane.objects.get(pk=name)
+        #       if ex.mdsum != mdsum:
+        #           if ex.mdsum is None:
+        #               print "mdsum has been provided"
+        #               ex.mdsum = mdsum
+        #               ex.save()
+        #           else:
+        #               print "wrong mdsum"
+        #               print ex.mdsum
+        #               print mdsum
+        #               sys.exit(2)
+        #       if ex.read_length != read_length:
+        #           print "wrong read_length"
+        #           sys.exit(2)
+        #       if ex.read_type != read_type:
+        #           print "wrong read_type"
+        #           sys.exit(2)
+        #       if int(ex.results) is not int(results):
+        #           if int(ex.results) == 0:
+        #               print "results are in"
+        #               ex.results = results
+        #               ex.save()
+        #           else:
+        #               print "wrong results"
+        #               print int(results)
+        #               print int(ex.results)
+        #               sys.exit(2)
+        #   Flowlane.create_or_update(mdsum,name,read_length,read_type,results,self)
+        #os.remove('temp.json') # remove temp file to avoid getting samples mixed up
 
 ###############
 
@@ -332,7 +334,7 @@ class Sample(models.Model):
         else:
             object = Sample.objects.get(pk=sample_id)
         ## if nothing has changed stop ... flowlane is problem
-        object.update_sample_forskalle(scientist,exptype,mbc,status)
+#object.update_sample_forskalle(scientist,exptype,mbc,status)
 
 
 
