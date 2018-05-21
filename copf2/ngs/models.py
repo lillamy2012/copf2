@@ -166,24 +166,25 @@ class Sample(models.Model):
 ##############
   
     def tissue_clean(self):
-        #    incornames = pd.read_csv(g.my_tissue_file,sep=";")
-        #wrong = incornames['Incorrect'].tolist()
-        #if self.tissue_type=="" or self.tissue_type=="nan": # empty string - change to NA
-        #    self.tissue_type="NA"
-        #    self.correctforskalle(tissue_type=self.tissue_type)
-        #else:
-        #    while self.tissue_type in wrong:
-        #       for i, row in incornames.iterrows():
-        #            if self.tissue_type==row['Incorrect']:
-        #                self.tissue_type=row['Correct']
-        #                self.correctforskalle(tissue_type=self.tissue_type)
+        incornames = pd.read_csv(g.my_tissue_file,sep=";")
+        wrong = incornames['Incorrect'].tolist()
+        if self.tissue_type=="" or self.tissue_type=="nan": # empty string - change to NA
+            self.tissue_type="NA"
+            self.correctforskalle(tissue_type=self.tissue_type)
+        else:
+            while self.tissue_type in wrong:
+                for i, row in incornames.iterrows():
+                    if self.tissue_type==row['Incorrect']:
+                        self.tissue_type=row['Correct']
+                        self.correctforskalle(tissue_type=self.tissue_type)
+        print "run"
         self.save()
 
 ###############
     
     @staticmethod
-    def check_barcode_type(barcode,secondary_tag):
-        if secondary_tag is not None:
+    def check_barcode_type(barcode,secondary_tag,barcode_type):
+        if barcode_type is not None:
             mbc=barcode+secondary_tag
         else:
             mbc=barcode
@@ -199,7 +200,7 @@ class Sample(models.Model):
         #if self.barcode != mbc:
         #    self.barcode = mbc
         #self.get_flowlanes()
-        #self.tissue_clean()
+        self.tissue_clean()
         #self.getRawfiles(g.my_demultiplex)
         self.save()
 
@@ -326,15 +327,15 @@ class Sample(models.Model):
 ###############
 
     @classmethod
-    def create_or_update(cls,antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_kit,sample_id,scientist,secondary_tag,status,tissue_type,treatment):
-        mbc = Sample.check_barcode_type(barcode,secondary_tag)
+    def create_or_update(cls,antibody,barcode,celltype,comments,descr,exptype,genotype,organism,preparation_kit,sample_id,scientist,secondary_tag,status,tissue_type,treatment,barcode_type):
+        mbc = Sample.check_barcode_type(barcode,secondary_tag,barcode_type)
         if not Sample.objects.filter(pk=sample_id).exists(): #create and SAVE new sample
             object = cls(antibody = antibody, barcode = mbc, celltype = celltype, comments = comments, descr = descr, exptype=exptype,genotype = genotype, organism = organism, preparation_kit = preparation_kit,sample_id = sample_id, scientist = scientist,status = status,tissue_type=tissue_type,treatment=treatment)
             object.save()
         else:
             object = Sample.objects.get(pk=sample_id)
         ## if nothing has changed stop ... flowlane is problem
-#object.update_sample_forskalle(scientist,exptype,mbc,status)
+        object.update_sample_forskalle(scientist,exptype,mbc,status)
 
 
 
