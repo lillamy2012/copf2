@@ -6,3 +6,6 @@ echo "migrate"
 python manage.py migrate  ## database created
 echo "initial"
 python copf2.py -t "initial"
+
+
+#$ python manage.py migrate --run-syncdb

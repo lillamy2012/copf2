@@ -9,9 +9,14 @@ import global_vars as g
 import secret as ts
 import datetime
 
-def getAPIstring(address="samples/group?filter.group=Berger&filter.received_after",days=0):
-    f_date = datetime.date.today() + datetime.timedelta(-days)
-    string = address+"="+str(f_date)
+def getAPIstring(group="Berger",days=0):
+    base="samples"
+    string = base+"/group?filter.group="+group
+    if int(days) > 0:
+        f_date = datetime.date.today() + datetime.timedelta(-days)
+        string = string+"&filter.received_after="+str(f_date)
+    if int(days) < 0:
+        raise Exception('nr days most be positive')
     return string
 
 

@@ -177,7 +177,7 @@ class Sample(models.Model):
                     if self.tissue_type==row['Incorrect']:
                         self.tissue_type=row['Correct']
                         self.correctforskalle(tissue_type=self.tissue_type)
-        print "run"
+    #print "run"
         self.save()
 
 ###############
@@ -193,14 +193,15 @@ class Sample(models.Model):
 ###############
 
     def update_sample_forskalle(self,scientist,exptype,mbc,status):
-        # if self.exptype != exptype or self.scientist != scientist:
-        #    sys.exit(2)
-        #if self.status != status:
-        #    self.status = status
-        #if self.barcode != mbc:
+        if self.exptype != exptype or self.scientist != scientist:
+            sys.exit(2)
+        if self.status != status:
+            self.status = status
+        if self.barcode != mbc:
+            sys.exit(2)
         #    self.barcode = mbc
-        #self.get_flowlanes()
-        self.tissue_clean()
+        self.get_flowlanes()
+#self.tissue_clean()
         #self.getRawfiles(g.my_demultiplex)
         self.save()
 
@@ -271,28 +272,29 @@ class Sample(models.Model):
 ###############
 
     def get_flowlanes(self):
-        #  if not self.status=="Ready": ## sample results not finished
-        return None
-        #forskalleapi('runs/sample/'+str(self.sample_id),'temp.json')
-        #data = read_json('temp.json')
-        #nr = len(data) ## number of flowcell+lane the sample is on
-        #for i in range(0,nr): ## process each flowcell+lane at the time
-        #   myd = data[i]
-        #   name = myd['flowcell_id']+"_"+str(myd['num'])
-        #   read_length = myd['flowcell']['readlen']
-        #   if myd['flowcell']['paired']==1:
-        #       read_type="PR"
-        #   else:
-        #       read_type="SR"
-        #   results = myd['is_ok']
-        #   if results==1:
-        #       cc = myd['unsplit_checks'] # md5 sum for multiplexed bam file
-        #       if not len(cc)==1:
-        #           raise Exception("wrong number of raw checks "+str(sample.sample_id)+" "+str(len(cc)))
-        #       for i in cc:
-        #           mdsum = cc[i]['md5']
-        #   else:
-        #       mdsum = None
+        print self.sample_id
+        if not self.status=="Ready": ## sample results not finished
+            return None
+        fsk3api('runs/illumina/sample/'+str(self.sample_id),'temp.json')
+        data = read_json('temp.json')
+        nr = len(data) ## number of flowcell+lane the sample is on
+        for i in range(0,nr): ## process each flowcell+lane at the time
+            myd = data[i]
+            name = myd['flowcell_id']+"_"+str(myd['num'])
+            read_length = myd['flowcell']['readlen']
+            if myd['flowcell']['paired']==1:
+                read_type="PR"
+            else:
+                read_type="SR"
+            results = myd['is_ok']
+            if results==1:
+                cc = myd['unsplit_checks'] # md5 sum for multiplexed bam file
+            if not len(cc)==1:
+                raise Exception("wrong number of raw checks "+str(sample.sample_id)+" "+str(len(cc)))
+            for i in cc:
+                mdsum = cc[i]['md5']
+            else:
+                mdsum = None
         #   if Flowlane.objects.filter(pk=name).exists():
         #       ex=Flowlane.objects.get(pk=name)
         #       if ex.mdsum != mdsum:
@@ -336,6 +338,7 @@ class Sample(models.Model):
             object = Sample.objects.get(pk=sample_id)
         ## if nothing has changed stop ... flowlane is problem
         object.update_sample_forskalle(scientist,exptype,mbc,status)
+        return(object)
 
 
 
